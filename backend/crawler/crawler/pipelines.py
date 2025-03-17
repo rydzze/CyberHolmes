@@ -1,15 +1,15 @@
 import os
 import django
+import asyncio
 import logging
-from datetime import datetime
+from django.utils import timezone
 from django.db import close_old_connections
 from asgiref.sync import sync_to_async
 from main.models import Spider, Post
 
+logger = logging.getLogger(__name__)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
-
-logger = logging.getLogger(__name__)
 
 class DjangoSpiderPipeline:
     def __init__(self):
@@ -25,7 +25,10 @@ class DjangoSpiderPipeline:
         logger.info(f"Spider run started: {self.spider_run.id}")
 
     def close_spider(self, spider):
-        self.spider_run.end_time = datetime.now()
+        asyncio.ensure_future(sync_to_async(self.update_spider)())
+
+    def update_spider(self):
+        self.spider_run.end_time = timezone.now()
         self.spider_run.status = 'completed'
         self.spider_run.save()
         close_old_connections()
