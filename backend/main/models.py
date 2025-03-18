@@ -19,6 +19,8 @@ class Post(models.Model):
     timestamp = models.DateTimeField()
     username = models.CharField(max_length=255)
     userlink = models.URLField()
+    threat = models.TextField(null=True, blank=True)
+    confidence = models.FloatField(null=True, blank=True)
 
     class Meta:
         ordering = ['-timestamp']
