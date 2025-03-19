@@ -1,6 +1,7 @@
 "use client"
-import { Settings, User, Sliders, LogOut, Menu, ChevronDown } from "lucide-react"
+import { Settings, User, Sliders, LogOut, Shield, ChevronDown, ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 import {
   Sidebar,
@@ -13,6 +14,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
 
@@ -23,15 +27,32 @@ import { navigationItems } from "@/config/navigation"
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({})
+
+  const toggleExpand = (itemName: string) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [itemName]: !prev[itemName],
+    }))
+  }
+
+  // Check if a path is active or one of its children is active
+  const isActiveOrHasActiveChild = (item) => {
+    if (pathname === item.href) return true
+    if (item.subItems) {
+      return item.subItems.some((subItem) => pathname === subItem.href)
+    }
+    return false
+  }
 
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="border-b">
         <div className="flex items-center p-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Menu className="h-4 w-4" />
+            <Shield className="h-4 w-4" />
           </div>
-          <span className="ml-2 text-lg font-semibold">ThreatIntel</span>
+          <span className="ml-2 text-lg font-semibold">CyberHolmes</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -42,12 +63,43 @@ export function AppSidebar() {
               <SidebarMenu>
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href}>
-                      <a href={item.href} className="flex items-center">
-                        <item.icon className="mr-2 h-4 w-4" />
-                        <span>{item.name}</span>
-                      </a>
-                    </SidebarMenuButton>
+                    {item.subItems ? (
+                      <>
+                        <SidebarMenuButton
+                          isActive={isActiveOrHasActiveChild(item)}
+                          onClick={() => toggleExpand(item.name)}
+                        >
+                          <item.icon className="mr-2 h-4 w-4" />
+                          <span>{item.name}</span>
+                          {expandedItems[item.name] ? (
+                            <ChevronDown className="ml-auto h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="ml-auto h-4 w-4" />
+                          )}
+                        </SidebarMenuButton>
+                        {expandedItems[item.name] && (
+                          <SidebarMenuSub>
+                            {item.subItems.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.name}>
+                                <SidebarMenuSubButton asChild isActive={pathname === subItem.href}>
+                                  <a href={subItem.href} className="flex items-center">
+                                    <subItem.icon className="mr-2 h-4 w-4" />
+                                    <span>{subItem.name}</span>
+                                  </a>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        )}
+                      </>
+                    ) : (
+                      <SidebarMenuButton asChild isActive={pathname === item.href}>
+                        <a href={item.href} className="flex items-center">
+                          <item.icon className="mr-2 h-4 w-4" />
+                          <span>{item.name}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    )}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -105,3 +157,4 @@ export function AppSidebar() {
     </Sidebar>
   )
 }
+
