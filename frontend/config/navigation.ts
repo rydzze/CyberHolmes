@@ -4,7 +4,7 @@ export const navigationItems = [
   {
     title: "Main",
     items: [
-      { name: "Dashboard", icon: BarChart3, href: "/" },
+      { name: "Dashboard", icon: BarChart3, href: "/dashboard" },
       {
         name: "Crawler",
         icon: Spider,

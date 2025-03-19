@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useRouter } from "next/navigation"
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/layout/app-sidebar"
@@ -14,9 +15,15 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children, title }: AppLayoutProps) {
+  const router = useRouter()
+  const handleLogout = () => {
+    // In a real app, you would clear auth tokens/cookies here
+    router.push("/")
+  }
+
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar handleLogout={handleLogout} />
       <SidebarInset>
         <header className="flex h-16 items-center justify-between gap-4 border-b px-6">
           <div className="flex items-center gap-4">
