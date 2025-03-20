@@ -1,21 +1,14 @@
 "use client"
 import {
-  BarChart,
-  LineChart,
-  PieChart,
-  DonutChart,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/chart"
+} from "@/components/ui/card"
 import { ArrowUpRight, ArrowDownRight, Globe, Shield, AlertTriangle, Skull } from "lucide-react"
-import { dashboardData } from "@/lib/data/dashboard-data"
 
 export function DashboardPage() {
-  const { threatsByRegion, threatTrendData, threatTypeData, severityData } = dashboardData
-
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -87,32 +80,12 @@ export function DashboardPage() {
             <CardTitle>Threat Trends</CardTitle>
             <CardDescription>Monthly threat activity by type</CardDescription>
           </CardHeader>
-          <CardContent>
-            <LineChart
-              data={threatTrendData}
-              index="name"
-              categories={["Malware", "Phishing", "DDoS"]}
-              colors={["#2563eb", "#f97316", "#ef4444"]}
-              yAxisWidth={40}
-              height={300}
-            />
-          </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Threat Types</CardTitle>
             <CardDescription>Distribution by category</CardDescription>
           </CardHeader>
-          <CardContent>
-            <PieChart
-              data={threatTypeData}
-              index="name"
-              valueFormatter={(number) => `${number}%`}
-              category="value"
-              colors={["#2563eb", "#f97316", "#ef4444", "#8b5cf6", "#a3a3a3"]}
-              height={300}
-            />
-          </CardContent>
         </Card>
       </div>
 
@@ -122,33 +95,12 @@ export function DashboardPage() {
             <CardTitle>Threats by Region</CardTitle>
             <CardDescription>Geographic distribution</CardDescription>
           </CardHeader>
-          <CardContent>
-            <BarChart
-              data={threatsByRegion}
-              index="name"
-              categories={["value"]}
-              colors={["#2563eb"]}
-              valueFormatter={(number) => `${number}%`}
-              yAxisWidth={48}
-              height={300}
-            />
-          </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Threat Severity</CardTitle>
             <CardDescription>Distribution by impact level</CardDescription>
           </CardHeader>
-          <CardContent className="flex items-center justify-center">
-            <DonutChart
-              data={severityData}
-              index="name"
-              category="value"
-              valueFormatter={(number) => `${number}%`}
-              colors={["#ef4444", "#f97316", "#eab308", "#22c55e"]}
-              height={300}
-            />
-          </CardContent>
         </Card>
       </div>
     </div>
