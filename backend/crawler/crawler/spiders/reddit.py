@@ -1,9 +1,10 @@
 import scrapy
 from urllib.parse import quote_plus
 from crawler.items import Post
+from scrapy import signals
 
 class RedditSpider(scrapy.Spider):
-    name = 'reddit'
+    name = 'Reddit'
 
     def __init__(self, keyword=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -13,6 +14,15 @@ class RedditSpider(scrapy.Spider):
         self.keyword = keyword
         self.seen_links = set()
         self.logger.info(f"Initialised spider with keyword: '{self.keyword}'")
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(RedditSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.logger.info("Spider closed: %s", spider.name)
 
     def start_requests(self):
         encoded_keyword = quote_plus(self.keyword)

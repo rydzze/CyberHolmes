@@ -3,9 +3,10 @@ from requests_tor import RequestsTor
 from scrapy.selector import Selector
 from urllib.parse import quote_plus
 from crawler.items import Post
+from scrapy import signals
 
 class DNASpider(scrapy.Spider):
-    name = "DNA"
+    name = "DarkNet Army"
 
     def __init__(self, keyword=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -16,19 +17,28 @@ class DNASpider(scrapy.Spider):
         self.seen_links = set()
         self.logger.info(f"Initialised spider with keyword: '{self.keyword}'")
 
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(DNASpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.logger.info("Spider closed: %s", spider.name)
+
     def start_requests(self):
         encoded_keyword = quote_plus(self.keyword)
         self.base_url = 'http://darknet77vonbqeatfsnawm5jtnoci5z22mxay6cizmoucgmz52mwyad.onion/'
-        self.target_url = self.base_url + f'search/1337/?q={encoded_keyword}&t=post&o=date&g=1'
+        self.target_url = f'{self.base_url}search/1337/?q={encoded_keyword}&t=post&o=date&g=1'
         
         yield scrapy.Request("https://check.torproject.org", callback=self.parse)
     
     def parse(self, response):
-        self.logger.info(f"Starting request with URL: {self.full_url}")
+        self.logger.info(f"Starting request with URL: {self.target_url}")
         self.tor_session = RequestsTor(tor_ports=(9050,), tor_cport=9051)
         tor_response = self.tor_session.get(self.target_url)
         
-        self.logger.info(f"Parsing posts in page: {self.full_url}")
+        self.logger.info(f"Parsing posts in page: {self.target_url}")
         selector = Selector(text=tor_response.text)
         hrefs = selector.css('div.contentRow-main h3.contentRow-title a::attr(href)').extract()
         links = [self.base_url + href.lstrip('./') for href in hrefs]
@@ -38,7 +48,9 @@ class DNASpider(scrapy.Spider):
             if tor_response_post.ok and link not in self.seen_links:
                 self.seen_links.add(link)
                 selector = Selector(text=tor_response_post.text)
-                self.parse_post(link, selector)
+                yield from self.parse_post(link, selector)
+        
+        yield scrapy.Request("https://www.torproject.org/", callback=self.end)
 
     def parse_post(self, post_link, selector):
         self.logger.info(f"Processing post: {post_link}")
@@ -63,3 +75,6 @@ class DNASpider(scrapy.Spider):
 
         except Exception as e:
             self.log(f"Error while processing link {post_link}: {str(e)}")
+    
+    def end(self, response):
+        yield None

@@ -3,9 +3,11 @@ from requests_tor import RequestsTor
 from scrapy.selector import Selector
 from urllib.parse import quote_plus
 from crawler.items import Post
+from datetime import datetime, timezone
+from scrapy import signals
 
 class BCWSpider(scrapy.Spider):
-    name = "BCW"
+    name = "Best Carding World"
 
     def __init__(self, keyword=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -16,20 +18,29 @@ class BCWSpider(scrapy.Spider):
         self.seen_links = set()
         self.logger.info(f"Initialised spider with keyword: '{self.keyword}'")
 
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(BCWSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        self.logger.info("Spider closed: %s", spider.name)
+
     def start_requests(self):
         encoded_keyword = quote_plus(self.keyword)
         self.base_url = 'http://bestteermb42clir6ux7xm76d4jjodh3fpahjqgbddbmfrgp4skg2wqd.onion/'
-        self.full_url = self.base_url + f'search.php?keywords={encoded_keyword}&terms=all&author=&sc=1&sf=all&sr=topics&sk=t&sd=d&st=0&ch=-1&t=0&submit=Search'
+        self.target_url = f'{self.base_url}search.php?keywords={encoded_keyword}&terms=all&author=&sc=1&sf=all&sr=topics&sk=t&sd=d&st=0&ch=-1&t=0&submit=Search'
         
         yield scrapy.Request("https://check.torproject.org", callback=self.parse)
 
     def parse(self, response):
         while True:
-            self.logger.info(f"Starting request with URL: {self.full_url}")
+            self.logger.info(f"Starting request with URL: {self.target_url}")
             self.tor_session = RequestsTor(tor_ports=(9050,), tor_cport=9051)
-            tor_response = self.tor_session.get(self.full_url)
+            tor_response = self.tor_session.get(self.target_url)
             
-            self.logger.info(f"Parsing posts in page: {self.full_url}")
+            self.logger.info(f"Parsing posts in page: {self.target_url}")
             selector = Selector(text=tor_response.text)
             hrefs = selector.css('a.topictitle::attr(href)').extract()
             links = [self.base_url + href.lstrip('./') for href in hrefs]
@@ -39,15 +50,17 @@ class BCWSpider(scrapy.Spider):
                 if tor_response_post.ok and link not in self.seen_links:
                     self.seen_links.add(link)
                     selector = Selector(text=tor_response_post.text)
-                    self.parse_post(link, selector)
+                    yield from self.parse_post(link, selector)
             
             next_page = selector.css('li.next a::attr(href)').get()
             if next_page is not None:
-                self.full_url = self.base_url + next_page.lstrip('./')
-                self.logger.info(f"Next page link detected: {self.full_url}. Proceeding to next page.")
+                self.target_url = self.base_url + next_page.lstrip('./')
+                self.logger.info(f"Next page link detected: {self.target_url}. Proceeding to next page.")
             else:
                 self.logger.info("No more pages available. Stopping spider.")
                 break
+        
+        yield scrapy.Request("https://www.torproject.org/", callback=self.end)
 
     def parse_post(self, post_link, selector):
         self.logger.info(f"Processing post: {post_link}")
@@ -55,7 +68,9 @@ class BCWSpider(scrapy.Spider):
         try:
             post_title = selector.css('h2.topic-title a::text').get()
             post_content = selector.xpath('(//div[@class="content"])[1]//text()').getall()
-            post_timestamp = selector.xpath('//p[@class="author"]/text()[last()]').get()
+            temp = selector.xpath('//p[@class="author"]/text()[last()]').get()
+            date_obj = datetime.strptime(temp, "%a %b %d, %Y %I:%M %p ")
+            post_timestamp = date_obj.replace(tzinfo=timezone.utc).isoformat()
             user_name = selector.css('a.username-coloured::text').get()
             user_link = selector.css('a.username-coloured::attr(href)').get()
 
@@ -72,3 +87,6 @@ class BCWSpider(scrapy.Spider):
 
         except Exception as e:
             self.logger.error(f"Error processing post {post_link}: {str(e)}")
+
+    def end(self, response):
+        yield None
