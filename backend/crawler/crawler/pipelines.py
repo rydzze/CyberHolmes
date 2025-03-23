@@ -1,10 +1,8 @@
 import os
 import django
-import asyncio
 import logging
 from django.utils import timezone
 from django.db import close_old_connections
-from asgiref.sync import sync_to_async
 from main.models import Spider, Post
 
 logger = logging.getLogger(__name__)
@@ -25,32 +23,34 @@ class DjangoSpiderPipeline:
         logger.info(f"Spider run started: {self.spider_run.id}")
 
     def close_spider(self, spider):
-        asyncio.ensure_future(sync_to_async(self.update_spider)())
-
-    def update_spider(self):
-        self.spider_run.end_time = timezone.now()
-        self.spider_run.status = 'completed'
-        self.spider_run.save()
-        close_old_connections()
+        try:
+            self.spider_run.end_time = timezone.now()
+            self.spider_run.status = 'completed'
+            self.spider_run.save()
+            logger.info(f"Spider run completed: {self.spider_run.id}")
+        except Exception as e:
+            logger.error(f"Error closing spider: {str(e)}")
+        finally:
+            close_old_connections()
 
 class DjangoPostPipeline:
-    async def process_item(self, item, spider):
+    def process_item(self, item, spider):
         try:
-            await sync_to_async(self.save_post)(item, spider)
+            Post.objects.get_or_create(
+                link=item['link'],
+                defaults={
+                    'spider': spider.spider_run,
+                    'title': item.get('title'),
+                    'content': item.get('content'),
+                    'timestamp': item.get('timestamp'),
+                    'username': item.get('username'),
+                    'userlink': item.get('userlink'),
+                }
+            )
+            logger.debug(f"Post saved: {item.get('title')}")
         except Exception as e:
             logger.error(f"Error saving post: {str(e)}")
-        return item
+        finally:
+            close_old_connections()
 
-    def save_post(self, item, spider):
-        Post.objects.get_or_create(
-            link=item['link'],
-            defaults={
-                'spider': spider.spider_run,
-                'title': item.get('title'),
-                'content': item.get('content'),
-                'timestamp': item.get('timestamp'),
-                'username': item.get('username'),
-                'userlink': item.get('userlink'),
-            }
-        )
-        close_old_connections()
+        return item

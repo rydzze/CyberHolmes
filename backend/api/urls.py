@@ -8,4 +8,5 @@ router.register(r'posts', PostViewSet, basename='post')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('deploy_crawler/', SpiderViewSet.as_view({'post': 'deploy_crawler'}), name='deploy_crawler')
 ]
