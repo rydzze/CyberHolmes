@@ -26,336 +26,51 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-// Sample crawler records data
-const crawlerRecords = [
-  {
-    id: "r-001",
-    crawlerName: "DarkWeb-Scanner-01",
-    crawlerType: "darkweb",
-    startTime: "2023-06-15T14:32:00Z",
-    endTime: "2023-06-15T16:45:00Z",
-    status: "completed",
-    urlsScanned: 487,
-    urlsTotal: 500,
-    threatsDetected: 23,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-002",
-    crawlerName: "Social-Media-Monitor-02",
-    crawlerType: "social",
-    startTime: "2023-06-14T09:17:00Z",
-    endTime: "2023-06-14T11:30:00Z",
-    status: "completed",
-    urlsScanned: 245,
-    urlsTotal: 250,
-    threatsDetected: 8,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-003",
-    crawlerName: "Forum-Crawler-03",
-    crawlerType: "forum",
-    startTime: "2023-06-13T22:45:00Z",
-    endTime: null,
-    status: "running",
-    urlsScanned: 127,
-    urlsTotal: 280,
-    threatsDetected: 5,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-004",
-    crawlerName: "Standard-Web-Scanner-04",
-    crawlerType: "standard",
-    startTime: "2023-06-12T16:30:00Z",
-    endTime: "2023-06-12T17:15:00Z",
-    status: "failed",
-    urlsScanned: 78,
-    urlsTotal: 300,
-    threatsDetected: 2,
-    user: "john.doe@example.com",
-    error: "Connection timeout after 30 seconds",
-  },
-  {
-    id: "r-005",
-    crawlerName: "Weekly-Threat-Scan",
-    crawlerType: "standard",
-    startTime: "2023-06-11T11:20:00Z",
-    endTime: "2023-06-11T14:45:00Z",
-    status: "completed",
-    urlsScanned: 500,
-    urlsTotal: 500,
-    threatsDetected: 17,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-006",
-    crawlerName: "DarkWeb-Scanner-02",
-    crawlerType: "darkweb",
-    startTime: "2023-06-10T08:15:00Z",
-    endTime: "2023-06-10T10:30:00Z",
-    status: "completed",
-    urlsScanned: 320,
-    urlsTotal: 320,
-    threatsDetected: 15,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-007",
-    crawlerName: "Social-Media-Scan",
-    crawlerType: "social",
-    startTime: "2023-06-09T14:50:00Z",
-    endTime: "2023-06-09T15:20:00Z",
-    status: "failed",
-    urlsScanned: 45,
-    urlsTotal: 200,
-    threatsDetected: 0,
-    user: "jane.smith@example.com",
-    error: "API rate limit exceeded",
-  },
-  {
-    id: "r-008",
-    crawlerName: "Custom-Threat-Scanner",
-    crawlerType: "custom",
-    startTime: "2023-06-08T19:22:00Z",
-    endTime: "2023-06-08T21:15:00Z",
-    status: "completed",
-    urlsScanned: 150,
-    urlsTotal: 150,
-    threatsDetected: 12,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-009",
-    crawlerName: "Weekly-Threat-Scan",
-    crawlerType: "standard",
-    startTime: "2023-06-04T11:20:00Z",
-    endTime: "2023-06-04T14:30:00Z",
-    status: "completed",
-    urlsScanned: 500,
-    urlsTotal: 500,
-    threatsDetected: 21,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-010",
-    crawlerName: "DarkWeb-Scanner-01",
-    crawlerType: "darkweb",
-    startTime: "2023-06-01T14:32:00Z",
-    endTime: "2023-06-01T16:45:00Z",
-    status: "completed",
-    urlsScanned: 487,
-    urlsTotal: 500,
-    threatsDetected: 19,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-011",
-    crawlerName: "Forum-Crawler-Special",
-    crawlerType: "forum",
-    startTime: "2023-05-28T10:15:00Z",
-    endTime: "2023-05-28T12:30:00Z",
-    status: "completed",
-    urlsScanned: 200,
-    urlsTotal: 200,
-    threatsDetected: 7,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-012",
-    crawlerName: "Darknet-Monitor-Advanced",
-    crawlerType: "darkweb",
-    startTime: "2023-05-25T08:20:00Z",
-    endTime: "2023-05-25T11:45:00Z",
-    status: "completed",
-    urlsScanned: 350,
-    urlsTotal: 350,
-    threatsDetected: 28,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-013",
-    crawlerName: "Social-Media-Extended",
-    crawlerType: "social",
-    startTime: "2023-05-22T14:10:00Z",
-    endTime: "2023-05-22T16:20:00Z",
-    status: "completed",
-    urlsScanned: 180,
-    urlsTotal: 180,
-    threatsDetected: 4,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-014",
-    crawlerName: "Standard-Web-Scanner-Full",
-    crawlerType: "standard",
-    startTime: "2023-05-18T09:30:00Z",
-    endTime: "2023-05-18T13:15:00Z",
-    status: "completed",
-    urlsScanned: 600,
-    urlsTotal: 600,
-    threatsDetected: 15,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-015",
-    crawlerName: "Custom-Threat-Deep",
-    crawlerType: "custom",
-    startTime: "2023-05-15T11:45:00Z",
-    endTime: "2023-05-15T14:30:00Z",
-    status: "failed",
-    urlsScanned: 120,
-    urlsTotal: 300,
-    threatsDetected: 3,
-    user: "john.doe@example.com",
-    error: "API authentication failed",
-  },
-  {
-    id: "r-016",
-    crawlerName: "Weekly-Threat-Scan",
-    crawlerType: "standard",
-    startTime: "2023-05-11T11:20:00Z",
-    endTime: "2023-05-11T14:45:00Z",
-    status: "completed",
-    urlsScanned: 500,
-    urlsTotal: 500,
-    threatsDetected: 19,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-017",
-    crawlerName: "DarkWeb-Scanner-Extended",
-    crawlerType: "darkweb",
-    startTime: "2023-05-08T16:20:00Z",
-    endTime: "2023-05-08T19:10:00Z",
-    status: "completed",
-    urlsScanned: 420,
-    urlsTotal: 420,
-    threatsDetected: 31,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-018",
-    crawlerName: "Forum-Crawler-Targeted",
-    crawlerType: "forum",
-    startTime: "2023-05-05T13:40:00Z",
-    endTime: "2023-05-05T15:15:00Z",
-    status: "completed",
-    urlsScanned: 150,
-    urlsTotal: 150,
-    threatsDetected: 9,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-019",
-    crawlerName: "Social-Media-Focused",
-    crawlerType: "social",
-    startTime: "2023-05-02T10:30:00Z",
-    endTime: "2023-05-02T12:45:00Z",
-    status: "completed",
-    urlsScanned: 220,
-    urlsTotal: 220,
-    threatsDetected: 6,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-020",
-    crawlerName: "Standard-Web-Scanner-Light",
-    crawlerType: "standard",
-    startTime: "2023-04-28T09:15:00Z",
-    endTime: "2023-04-28T10:30:00Z",
-    status: "completed",
-    urlsScanned: 250,
-    urlsTotal: 250,
-    threatsDetected: 8,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-021",
-    crawlerName: "Weekly-Threat-Scan",
-    crawlerType: "standard",
-    startTime: "2023-04-25T11:20:00Z",
-    endTime: "2023-04-25T14:30:00Z",
-    status: "completed",
-    urlsScanned: 500,
-    urlsTotal: 500,
-    threatsDetected: 22,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-022",
-    crawlerName: "Custom-Threat-Scanner-Special",
-    crawlerType: "custom",
-    startTime: "2023-04-22T15:10:00Z",
-    endTime: "2023-04-22T17:45:00Z",
-    status: "completed",
-    urlsScanned: 180,
-    urlsTotal: 180,
-    threatsDetected: 11,
-    user: "jane.smith@example.com",
-  },
-  {
-    id: "r-023",
-    crawlerName: "DarkWeb-Scanner-Focused",
-    crawlerType: "darkweb",
-    startTime: "2023-04-18T12:30:00Z",
-    endTime: "2023-04-18T15:15:00Z",
-    status: "completed",
-    urlsScanned: 300,
-    urlsTotal: 300,
-    threatsDetected: 25,
-    user: "john.doe@example.com",
-  },
-  {
-    id: "r-024",
-    crawlerName: "Social-Media-Limited",
-    crawlerType: "social",
-    startTime: "2023-04-15T09:45:00Z",
-    endTime: "2023-04-15T11:20:00Z",
-    status: "failed",
-    urlsScanned: 85,
-    urlsTotal: 150,
-    threatsDetected: 2,
-    user: "jane.smith@example.com",
-    error: "Rate limit exceeded",
-  },
-  {
-    id: "r-025",
-    crawlerName: "Forum-Crawler-Quick",
-    crawlerType: "forum",
-    startTime: "2023-04-12T14:20:00Z",
-    endTime: "2023-04-12T15:30:00Z",
-    status: "completed",
-    urlsScanned: 100,
-    urlsTotal: 100,
-    threatsDetected: 5,
-    user: "john.doe@example.com",
-  },
-]
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import type { CrawlerRecord } from "@/lib/types/crawler"
+import { fetchAllCrawlerRecords } from "@/lib/api/crawlers"
 
 export function RecordsPage() {
   const [searchTerm, setSearchTerm] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState("all")
-  const [typeFilter, setTypeFilter] = React.useState("all")
-  const [selectedRecord, setSelectedRecord] = React.useState(null)
+  const [selectedRecord, setSelectedRecord] = React.useState<CrawlerRecord | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(false)
+  const [records, setRecords] = React.useState<CrawlerRecord[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
   // Pagination state
   const [currentPage, setCurrentPage] = React.useState(1)
   const recordsPerPage = 10
 
-  // Filter records based on search term and filters
-  const filteredRecords = crawlerRecords.filter((record) => {
+  React.useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const data = await fetchAllCrawlerRecords()
+        setRecords(data)
+      } catch (err) {
+        console.error("Error fetching crawler records:", err)
+        setError("Failed to load crawler records. Please try again later.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchRecords()
+  }, [])
+
+  const filteredRecords = records.filter((record) => {
     const matchesSearch =
-      record.crawlerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.user.toLowerCase().includes(searchTerm.toLowerCase())
+      record.spider_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.keyword.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === "all" || record.status === statusFilter
-    const matchesType = typeFilter === "all" || record.crawlerType === typeFilter
 
-    return matchesSearch && matchesStatus && matchesType
+    return matchesSearch && matchesStatus
   })
 
   // Calculate pagination values
@@ -368,13 +83,13 @@ export function RecordsPage() {
   const currentRecords = filteredRecords.slice(indexOfFirstRecord, indexOfLastRecord)
 
   // Pagination controls
-  const goToPage = (page) => {
+  const goToPage = (page: number) => {
     if (page < 1) page = 1
     if (page > totalPages) page = totalPages
     setCurrentPage(page)
   }
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A"
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -386,7 +101,7 @@ export function RecordsPage() {
     })
   }
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
         return (
@@ -421,9 +136,105 @@ export function RecordsPage() {
     }
   }
 
-  const handleViewDetails = (record) => {
+  const handleViewDetails = (record: CrawlerRecord) => {
     setSelectedRecord(record)
     setIsDetailsOpen(true)
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <Skeleton className="h-8 w-64" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+              <Skeleton className="h-10 w-full" />
+              <div className="flex gap-2">
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+            </div>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>
+                      <Skeleton className="h-4 w-24" />
+                    </TableHead>
+                    <TableHead>
+                      <Skeleton className="h-4 w-24" />
+                    </TableHead>
+                    <TableHead>
+                      <Skeleton className="h-4 w-24" />
+                    </TableHead>
+                    <TableHead>
+                      <Skeleton className="h-4 w-24" />
+                    </TableHead>
+                    <TableHead>
+                      <Skeleton className="h-4 w-24" />
+                    </TableHead>
+                    <TableHead className="text-right">
+                      <Skeleton className="h-4 w-24" />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array(5)
+                    .fill(0)
+                    .map((_, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Skeleton className="h-5 w-32" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-32" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-24" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Skeleton className="h-8 w-8" />
+                            <Skeleton className="h-8 w-8" />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    )
   }
 
   return (
@@ -451,7 +262,6 @@ export function RecordsPage() {
                   <DropdownMenuItem
                     onClick={() => {
                       setStatusFilter("all")
-                      setTypeFilter("all")
                     }}
                   >
                     Clear Filters
@@ -471,7 +281,7 @@ export function RecordsPage() {
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value)
-                  setCurrentPage(1) // Reset to first page on search
+                  setCurrentPage(1)
                 }}
               />
             </div>
@@ -480,7 +290,7 @@ export function RecordsPage() {
                 value={statusFilter}
                 onValueChange={(value) => {
                   setStatusFilter(value)
-                  setCurrentPage(1) // Reset to first page on filter change
+                  setCurrentPage(1)
                 }}
               >
                 <SelectTrigger className="w-[130px]">
@@ -494,25 +304,6 @@ export function RecordsPage() {
                   <SelectItem value="scheduled">Scheduled</SelectItem>
                 </SelectContent>
               </Select>
-              <Select
-                value={typeFilter}
-                onValueChange={(value) => {
-                  setTypeFilter(value)
-                  setCurrentPage(1) // Reset to first page on filter change
-                }}
-              >
-                <SelectTrigger className="w-[130px]">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="darkweb">Dark Web</SelectItem>
-                  <SelectItem value="forum">Forum</SelectItem>
-                  <SelectItem value="social">Social Media</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
@@ -520,47 +311,29 @@ export function RecordsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Crawler</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Spider</TableHead>
+                  <TableHead>Keyword</TableHead>
                   <TableHead>Start Time</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Threats</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentRecords.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No records found.
                     </TableCell>
                   </TableRow>
                 ) : (
                   currentRecords.map((record) => (
                     <TableRow key={record.id}>
-                      <TableCell className="font-medium">{record.crawlerName}</TableCell>
-                      <TableCell>{record.crawlerType.charAt(0).toUpperCase() + record.crawlerType.slice(1)}</TableCell>
-                      <TableCell>{formatDate(record.startTime)}</TableCell>
+                      <TableCell>{record.id}</TableCell>
+                      <TableCell className="font-medium">{record.spider_name}</TableCell>
+                      <TableCell>{record.keyword}</TableCell>
+                      <TableCell>{formatDate(record.start_time)}</TableCell>
                       <TableCell>{getStatusBadge(record.status)}</TableCell>
-                      <TableCell>
-                        {record.status === "running" ? (
-                          <div className="flex items-center">
-                            <span className="mr-2">{Math.round((record.urlsScanned / record.urlsTotal) * 100)}%</span>
-                            <div className="h-2 w-24 rounded-full bg-muted">
-                              <div
-                                className="h-full rounded-full bg-primary"
-                                style={{ width: `${(record.urlsScanned / record.urlsTotal) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <span>
-                            {record.urlsScanned}/{record.urlsTotal}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{record.threatsDetected}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleViewDetails(record)}>
@@ -666,7 +439,7 @@ export function RecordsPage() {
           <DialogHeader>
             <DialogTitle>Crawler Record Details</DialogTitle>
             <DialogDescription>
-              {selectedRecord && `Details for ${selectedRecord.crawlerName} execution`}
+              {selectedRecord && `Details for ${selectedRecord.spider_name} execution`}
             </DialogDescription>
           </DialogHeader>
 
@@ -674,20 +447,20 @@ export function RecordsPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Crawler Name</h4>
-                  <p>{selectedRecord.crawlerName}</p>
+                  <h4 className="text-sm font-medium text-muted-foreground">ID</h4>
+                  <p>{selectedRecord.id}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Type</h4>
-                  <p>{selectedRecord.crawlerType.charAt(0).toUpperCase() + selectedRecord.crawlerType.slice(1)}</p>
+                  <h4 className="text-sm font-medium text-muted-foreground">Spider Name</h4>
+                  <p>{selectedRecord.spider_name}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Keyword</h4>
+                  <p>{selectedRecord.keyword}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
                   <div className="mt-1">{getStatusBadge(selectedRecord.status)}</div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">User</h4>
-                  <p>{selectedRecord.user}</p>
                 </div>
               </div>
 
@@ -696,33 +469,21 @@ export function RecordsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground">Start Time</h4>
-                  <p>{formatDate(selectedRecord.startTime)}</p>
+                  <p>{formatDate(selectedRecord.start_time)}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground">End Time</h4>
-                  <p>{formatDate(selectedRecord.endTime)}</p>
+                  <p>{formatDate(selectedRecord.end_time)}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">URLs Scanned</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">Duration</h4>
                   <p>
-                    {selectedRecord.urlsScanned} / {selectedRecord.urlsTotal}
+                    {selectedRecord.end_time
+                      ? `${Math.round((new Date(selectedRecord.end_time).getTime() - new Date(selectedRecord.start_time).getTime()) / 1000)} seconds`
+                      : "In progress"}
                   </p>
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Threats Detected</h4>
-                  <p>{selectedRecord.threatsDetected}</p>
-                </div>
               </div>
-
-              {selectedRecord.error && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Error</h4>
-                    <p className="text-red-500">{selectedRecord.error}</p>
-                  </div>
-                </>
-              )}
 
               <div className="flex justify-end gap-2 mt-4">
                 <Button variant="outline">
