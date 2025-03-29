@@ -35,3 +35,30 @@ def preprocess_text(text):
     tokens = [word for word in tokens if word not in stop_words and len(word) > 2]
     
     return ' '.join(tokens)
+
+def predict_threat(model, text):
+    cleaned_text = preprocess_text(text)
+    prediction = model.predict([cleaned_text])[0]
+    probability = model.predict_proba([cleaned_text])[0]
+
+    threat = "Yes" if prediction == 1 else "No"
+    confidence = round(probability[1] * 100, 2)
+
+    return threat, confidence
+
+def analyse_sentiment(sentiment_analyzer, text):
+    sentiment_scores = sentiment_analyzer.polarity_scores(text)
+    
+    compound_score = sentiment_scores['compound']
+    if compound_score >= 0.05:
+        overall_sentiment = "Positive"
+    elif compound_score <= -0.05:
+        overall_sentiment = "Negative"
+    else:
+        overall_sentiment = "Neutral"
+    
+    positive_score = sentiment_scores['pos']
+    negative_score = sentiment_scores['neg']
+    neutral_score = sentiment_scores['neu']
+
+    return overall_sentiment, positive_score, negative_score, neutral_score, compound_score

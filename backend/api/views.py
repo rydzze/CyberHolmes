@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from main.models import Spider, Post
-from api.serializers import SpiderSerializer, PostSerializer
+from main.models import Spider, Post, Analysis
+from api.serializers import SpiderSerializer, PostSerializer, AnalysisSerializer, PostWithAnalysisSerializer
 from scrapy.crawler import CrawlerRunner
 from scrapy.spiderloader import SpiderLoader
 from scrapy.utils.project import get_project_settings
@@ -119,4 +119,15 @@ class SpiderViewSet(viewsets.ModelViewSet):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=['get'])
+    def analysis_records(self, request):
+        posts = Post.objects.select_related('spider', 'analysis').all()
+        serializer = PostWithAnalysisSerializer(posts, many=True)
+        return Response(serializer.data)
+
+class AnalysisViewSet(viewsets.ModelViewSet):
+    queryset = Analysis.objects.all()
+    serializer_class = AnalysisSerializer
     permission_classes = [permissions.AllowAny]

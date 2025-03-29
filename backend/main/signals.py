@@ -1,24 +1,30 @@
+import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from analysis.loader import MLModel
-from analysis.functions import preprocess_text
-from main.models import Post
+from analysis.loader import Model
+from analysis.functions import predict_threat, analyse_sentiment
+from main.models import Post, Analysis
+
+logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Post)
 def predict_new_post(sender, instance, created, **kwargs):
-    if created and not instance.threat:
+    if created:
         try:
-            model = MLModel.load_model()
+            ml_model = Model.load_ml_model()
+            sentiment_analyser = Model.load_sentiment_analyser()
             text = f"{instance.title} {instance.content or ''}".strip()
             
             if text:
-                cleaned_text = preprocess_text(text)
-                proba = model.predict_proba([cleaned_text])[0]
-                prediction = model.predict([cleaned_text])[0]
-                
-                instance.threat = "Yes" if prediction == 1 else "No"
-                instance.confidence = round(proba[1] * 100, 2)
-                instance.save(update_fields=['threat', 'confidence'])
+                analysis = Analysis(post=instance)
+                analysis.threat, analysis.confidence = predict_threat(ml_model, text)
+                (analysis.overall_sentiment, 
+                 analysis.positive_score, 
+                 analysis.negative_score, 
+                 analysis.neutral_score, 
+                 analysis.compound_score) = analyse_sentiment(sentiment_analyser, text)
+
+                analysis.save()
                 
         except Exception as e:
-            pass
+            logger.error(f"Error processing post {instance.id}: {e}")

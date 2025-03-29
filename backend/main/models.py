@@ -19,8 +19,16 @@ class Post(models.Model):
     timestamp = models.DateTimeField()
     username = models.CharField(max_length=255)
     userlink = models.URLField()
-    threat = models.TextField(null=True, blank=True)
-    confidence = models.FloatField(null=True, blank=True)
 
     class Meta:
         ordering = ['-timestamp']
+
+class Analysis(models.Model):
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='analysis')
+    threat = models.TextField(null=True, blank=True)
+    confidence = models.FloatField(null=True, blank=True)
+    overall_sentiment = models.TextField(null=True, blank=True)
+    positive_score = models.FloatField(null=True, blank=True)
+    negative_score = models.FloatField(null=True, blank=True)
+    neutral_score = models.FloatField(null=True, blank=True)
+    compound_score = models.FloatField(null=True, blank=True)
