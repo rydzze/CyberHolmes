@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 export async function fetchAllThreats(): Promise<Threat[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/`, {
+    const response = await fetch(`${API_BASE_URL}/analysis_records/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

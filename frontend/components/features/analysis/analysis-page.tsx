@@ -51,9 +51,8 @@ export function AnalysisPage() {
       const lowercaseSearch = searchTerm.toLowerCase()
       const filtered = allThreats.filter(
         (threat) =>
-          threat.title.toLowerCase().includes(lowercaseSearch) ||
-          threat.content.toLowerCase().includes(lowercaseSearch) ||
-          threat.username.toLowerCase().includes(lowercaseSearch),
+          threat.title?.toLowerCase().includes(lowercaseSearch) ||
+          (threat.content ? threat.content.toLowerCase().includes(lowercaseSearch) : false),
       )
       setFilteredThreats(filtered)
     }
@@ -68,7 +67,6 @@ export function AnalysisPage() {
   if (isLoading && filteredThreats.length === 0) {
     return (
       <div className="flex h-[calc(100vh-4rem)]">
-        {/* CHANGE: Updated width from 2/5 to 1/4 (25%) for loading skeleton */}
         <div className="w-1/4 border-r flex flex-col">
           <div className="p-4 border-b">
             <Skeleton className="h-10 w-full mb-2" />
@@ -92,7 +90,6 @@ export function AnalysisPage() {
               ))}
           </div>
         </div>
-        {/* CHANGE: Updated width from 3/5 to 3/4 (75%) for loading skeleton */}
         <div className="flex-1 p-6">
           <Skeleton className="h-8 w-3/4 mb-4" />
           <Skeleton className="h-6 w-1/2 mb-8" />
@@ -118,7 +115,6 @@ export function AnalysisPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
-      {/* CHANGE: Updated width from 2/5 to 1/4 (25%) for threat list */}
       <div className="w-1/4 border-r">
         <ThreatList
           threats={filteredThreats}
@@ -129,10 +125,7 @@ export function AnalysisPage() {
           isLoading={isLoading}
         />
       </div>
-      {/* CHANGE: Updated width from 3/5 to 3/4 (75%) for threat detail */}
-      <div className="w-3/4">
-        {selectedThreat && <ThreatDetail threat={selectedThreat} />}
-      </div>
+      <div className="w-3/4">{selectedThreat && <ThreatDetail threat={selectedThreat} />}</div>
     </div>
   )
 }

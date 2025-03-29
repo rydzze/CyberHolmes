@@ -6,15 +6,19 @@ export interface Threat {
   timestamp: string
   username: string
   userlink: string
-  threat: string
-  confidence: number
+  source: string
   spider: number
+  analysis?: {
+    id: number
+    threat: string
+    confidence: number
+    overall_sentiment: string
+    positive_score: number
+    negative_score: number
+    neutral_score: number
+    compound_score: number
+    post: number
+  }
+  isFlagged?: boolean // Added for UI state
 }
-  
-export interface ApiResponse {
-  data: Threat[]
-  total: number
-  page: number
-  limit: number
-}
-  
+
