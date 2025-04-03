@@ -32,6 +32,21 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
 
+    --neutral: 160, 84%, 39%;
+    --low: 45, 93%, 47%;
+    --medium: 25, 95%, 53%;
+    --high: 0, 84%, 60%;
+    --critical: 0, 74%, 42%;
+    
+    --pos: 160, 84%, 39%;
+    --neu: 199, 89%, 48%;
+    --neg: 0, 74%, 42%;
+    
+    --clear-web: 173 58% 39%;
+    --dark-web: 12 76% 61%;
+    
+    --bar-chart: 173 58% 39%;
+
     --radius: 0.5rem;
 
     /* Sidebar specific variables */

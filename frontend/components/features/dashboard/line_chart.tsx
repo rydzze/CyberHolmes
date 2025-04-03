@@ -1,0 +1,130 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { CartesianGrid, Line, LineChart as RechartsLineChart, XAxis, YAxis } from "recharts"
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import { fetchPostsOverTime } from "@/lib/api/dashboard"
+import { LineChartData } from "@/lib/types/dashboard"
+
+const chartConfig = {
+  clear_web: {
+    label: "Clear Web",
+    color: "hsl(var(--clear-web))",
+  },
+  dark_web: {
+    label: "Dark Web",
+    color: "hsl(var(--dark-web))",
+  },
+} satisfies ChartConfig
+
+export function LineChart() {
+  const [chartData, setChartData] = useState<LineChartData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const data = await fetchPostsOverTime()
+        setChartData(data)
+      } catch (err) {
+        setError("Failed to fetch time series data")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Posts Scraped over Time</CardTitle>
+          <CardDescription>within the last 6 months</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[300px] w-full" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error && chartData.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Posts Scraped over Time</CardTitle>
+          <CardDescription>within the last 6 months</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Posts Scraped over Time</CardTitle>
+        <CardDescription>within the last 6 months</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig}>
+          <RechartsLineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+              top: 12,
+              bottom: 12,
+            }}
+            height={300}
+          >
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <Line
+              dataKey="clear_web"
+              type="monotone"
+              stroke="var(--color-clear_web)"
+              strokeWidth={2}
+              dot={{ fill: "var(--color-clear_web)", r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              dataKey="dark_web"
+              type="monotone"
+              stroke="var(--color-dark_web)"
+              strokeWidth={2}
+              dot={{ fill: "var(--color-dark_web)", r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </RechartsLineChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  )
+}
+

@@ -19,6 +19,5 @@ export interface Threat {
     compound_score: number
     post: number
   }
-  isFlagged?: boolean // Added for UI state
 }
 
