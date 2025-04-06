@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation"
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-import { ProfileModal } from "@/components/features/profile/profile-modal"
-import { PreferencesModal } from "@/components/features/profile/preferences-modal"
 import { ThemeToggle } from "@/components/common/theme-toggle"
 
 interface AppLayoutProps {
@@ -16,6 +14,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, title }: AppLayoutProps) {
   const router = useRouter()
+
   const handleLogout = () => {
     // In a real app, you would clear auth tokens/cookies here
     router.push("/")
@@ -34,8 +33,7 @@ export function AppLayout({ children, title }: AppLayoutProps) {
         </header>
         <main className={title === "Analysis" ? "flex-1" : "flex-1 p-6"}>{children}</main>
       </SidebarInset>
-      <ProfileModal />
-      <PreferencesModal />
     </SidebarProvider>
   )
 }
+

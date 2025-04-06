@@ -3,15 +3,9 @@
 import * as React from "react"
 import {
   Search,
-  Filter,
-  Download,
-  Eye,
-  RotateCw,
-  Trash2,
   BugIcon as Spider,
   CheckCircle2,
   AlertCircle,
-  Clock,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -19,15 +13,14 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import type { CrawlerRecord } from "@/lib/types/crawler"
 import { fetchAllCrawlerRecords } from "@/lib/api/crawlers"
 
@@ -44,6 +37,7 @@ export function RecordsPage() {
   const [currentPage, setCurrentPage] = React.useState(1)
   const recordsPerPage = 10
 
+  // Fetch crawler records from API
   React.useEffect(() => {
     const fetchRecords = async () => {
       try {
@@ -63,6 +57,7 @@ export function RecordsPage() {
     fetchRecords()
   }, [])
 
+  // Filter records based on search term and status filter
   const filteredRecords = records.filter((record) => {
     const matchesSearch =
       record.spider_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,19 +119,13 @@ export function RecordsPage() {
             Failed
           </Badge>
         )
-      case "scheduled":
-        return (
-          <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400">
-            <Clock className="mr-1 h-3 w-3" />
-            Scheduled
-          </Badge>
-        )
       default:
         return <Badge variant="outline">{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>
     }
   }
 
-  const handleViewDetails = (record: CrawlerRecord) => {
+  // Handle row click to view details
+  const handleRowClick = (record: CrawlerRecord) => {
     setSelectedRecord(record)
     setIsDetailsOpen(true)
   }
@@ -149,17 +138,12 @@ export function RecordsPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <Skeleton className="h-8 w-64" />
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-24" />
-                <Skeleton className="h-9 w-24" />
-              </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
               <Skeleton className="h-10 w-full" />
               <div className="flex gap-2">
-                <Skeleton className="h-10 w-32" />
                 <Skeleton className="h-10 w-32" />
               </div>
             </div>
@@ -182,7 +166,7 @@ export function RecordsPage() {
                     <TableHead>
                       <Skeleton className="h-4 w-24" />
                     </TableHead>
-                    <TableHead className="text-right">
+                    <TableHead>
                       <Skeleton className="h-4 w-24" />
                     </TableHead>
                   </TableRow>
@@ -207,11 +191,8 @@ export function RecordsPage() {
                         <TableCell>
                           <Skeleton className="h-5 w-24" />
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Skeleton className="h-8 w-8" />
-                            <Skeleton className="h-8 w-8" />
-                          </div>
+                        <TableCell>
+                          <Skeleton className="h-5 w-24" />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -246,29 +227,6 @@ export function RecordsPage() {
               <CardTitle>Crawler Records</CardTitle>
               <CardDescription>View and manage your crawler execution history</CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Download className="mr-1 h-4 w-4" />
-                Export
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Filter className="mr-1 h-4 w-4" />
-                    Filter
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setStatusFilter("all")
-                    }}
-                  >
-                    Clear Filters
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -281,7 +239,7 @@ export function RecordsPage() {
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value)
-                  setCurrentPage(1)
+                  setCurrentPage(1) // Reset to first page on search
                 }}
               />
             </div>
@@ -290,7 +248,7 @@ export function RecordsPage() {
                 value={statusFilter}
                 onValueChange={(value) => {
                   setStatusFilter(value)
-                  setCurrentPage(1)
+                  setCurrentPage(1) // Reset to first page on filter change
                 }}
               >
                 <SelectTrigger className="w-[130px]">
@@ -301,7 +259,6 @@ export function RecordsPage() {
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="running">Running</SelectItem>
                   <SelectItem value="failed">Failed</SelectItem>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -315,8 +272,8 @@ export function RecordsPage() {
                   <TableHead>Spider</TableHead>
                   <TableHead>Keyword</TableHead>
                   <TableHead>Start Time</TableHead>
+                  <TableHead>End Time</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -328,30 +285,17 @@ export function RecordsPage() {
                   </TableRow>
                 ) : (
                   currentRecords.map((record) => (
-                    <TableRow key={record.id}>
+                    <TableRow
+                      key={record.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleRowClick(record)}
+                    >
                       <TableCell>{record.id}</TableCell>
                       <TableCell className="font-medium">{record.spider_name}</TableCell>
                       <TableCell>{record.keyword}</TableCell>
                       <TableCell>{formatDate(record.start_time)}</TableCell>
+                      <TableCell>{formatDate(record.end_time)}</TableCell>
                       <TableCell>{getStatusBadge(record.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleViewDetails(record)}>
-                            <Eye className="h-4 w-4" />
-                            <span className="sr-only">View details</span>
-                          </Button>
-                          {record.status === "failed" && (
-                            <Button variant="ghost" size="icon">
-                              <RotateCw className="h-4 w-4" />
-                              <span className="sr-only">Retry</span>
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -483,19 +427,6 @@ export function RecordsPage() {
                       : "In progress"}
                   </p>
                 </div>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline">
-                  <Download className="mr-2 h-4 w-4" />
-                  Export Report
-                </Button>
-                {selectedRecord.status === "failed" && (
-                  <Button>
-                    <RotateCw className="mr-2 h-4 w-4" />
-                    Retry Crawler
-                  </Button>
-                )}
               </div>
             </div>
           )}

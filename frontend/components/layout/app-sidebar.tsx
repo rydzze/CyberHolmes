@@ -1,5 +1,5 @@
 "use client"
-import { Settings, User, Sliders, LogOut, Shield, ChevronDown, ChevronRight } from "lucide-react"
+import { LogOut, Shield, User, ChevronDown, ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 
@@ -20,12 +20,17 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 // Navigation items moved to a separate config file
 import { navigationItems } from "@/config/navigation"
 
-export function AppSidebar() {
+// Add handleLogout prop to the interface
+interface AppSidebarProps {
+  handleLogout?: () => void
+}
+
+export function AppSidebar({ handleLogout }: AppSidebarProps) {
   const pathname = usePathname()
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({})
 
@@ -108,49 +113,18 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter className="border-t p-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center p-2 cursor-pointer hover:bg-muted/50 rounded-md">
-              <div className="h-8 w-8 rounded-full bg-muted">
-                <img
-                  alt="User avatar"
-                  className="h-full w-full rounded-full object-cover"
-                />
-              </div>
-              <div className="ml-2">
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-muted-foreground">Analyst</p>
-              </div>
-              <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center p-2">
+            <User className="ml-1 h-5 w-5 text-muted-foreground" />
+            <div className="ml-3">
+              <p className="text-sm font-medium">CyberHolmes Admin</p>
             </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem asChild>
-              <a href="#" onClick={() => window.dispatchEvent(new CustomEvent("open-profile-modal"))}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="#" onClick={() => window.dispatchEvent(new CustomEvent("open-preferences-modal"))}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="#" onClick={() => window.dispatchEvent(new CustomEvent("toggle-theme"))}>
-                <Sliders className="mr-2 h-4 w-4" />
-                <span>Preferences</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="/logout">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
-              </a>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </div>
+          <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Logout</span>
+          </Button>
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
