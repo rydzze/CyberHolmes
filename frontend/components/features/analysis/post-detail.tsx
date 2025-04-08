@@ -1,18 +1,18 @@
 "use client"
 import { ExternalLink } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
-import type { Threat } from "@/lib/types/threat"
-import { formatDate, getConfidenceBadge } from "@/lib/utils/threat"
+import type { Post } from "@/lib/types/post"
+import { formatDate, getConfidenceBadge } from "@/lib/utils/post"
 
-interface ThreatDetailProps {
-  threat: Threat
+interface PostDetailProps {
+  post: Post
 }
 
-export function ThreatDetail({ threat }: ThreatDetailProps) {
-  if (!threat) return null
+export function PostDetail({ post }: PostDetailProps) {
+  if (!post) return null
 
   // Get the confidence level for display in the analysis section
-  const confidenceDecimal = threat.analysis?.confidence ? threat.analysis.confidence / 100 : 0
+  const confidenceDecimal = post.analysis?.confidence ? post.analysis.confidence / 100 : 0
   const confidenceLevel =
     confidenceDecimal > 0.85
       ? "Critical"
@@ -29,18 +29,18 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
       <div className="p-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{threat.title}</h1>
+            <h1 className="text-2xl font-bold">{post.title}</h1>
             {/* Display confidence badge based on analysis data */}
             <div className="flex-shrink-0 mt-1">
-              {threat.analysis && getConfidenceBadge(threat.analysis.confidence)}
+              {post.analysis && getConfidenceBadge(post.analysis.confidence)}
             </div>
           </div>
           <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
-            <span>ID: {threat.id}</span>
+            <span>ID: {post.id}</span>
             <span>•</span>
-            <span>Source: {threat.source}</span>
+            <span>Source: {post.source}</span>
             <span>•</span>
-            <span>Detected: {formatDate(threat.timestamp)}</span>
+            <span>Detected: {formatDate(post.timestamp)}</span>
           </div>
         </div>
 
@@ -49,12 +49,12 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
         {/* Threat Prediction Section */}
         <div className="mb-6">
           <h2 className="text-lg font-semibold mb-2">Threat Prediction</h2>
-          {threat.analysis?.threat === "Yes" ? (
+          {post.analysis?.threat === true ? (
             <div className="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/20">
               <p className="font-medium text-red-800 dark:text-red-400">{confidenceLevel} Threat Detected</p>
               <p className="mt-1 text-sm text-red-700 dark:text-red-300">
                 This content has been identified as a potential security threat with a confidence score of{" "}
-                {threat.analysis.confidence.toFixed(1)}%.
+                {post.analysis.confidence.toFixed(1)}%.
               </p>
             </div>
           ) : (
@@ -62,7 +62,7 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
               <p className="font-medium text-green-800 dark:text-green-400">No Threat Detected</p>
               <p className="mt-1 text-sm text-green-700 dark:text-green-300">
                 This content has been analyzed and no security threats were identified.
-                {threat.analysis?.confidence && ` Confidence: ${threat.analysis.confidence.toFixed(1)}%`}
+                {post.analysis?.confidence && ` Confidence: ${post.analysis.confidence.toFixed(1)}%`}
               </p>
             </div>
           )}
@@ -71,7 +71,7 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
         {/* Sentiment Analysis and Source Info side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Sentiment Analysis Section */}
-          {threat.analysis && (
+          {post.analysis && (
             <div>
               <h2 className="text-lg font-semibold mb-2">Sentiment Analysis</h2>
               <div className="rounded-md border p-4 bg-muted/20 min-h-[180px]">
@@ -80,11 +80,11 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Overall Sentiment</p>
-                      <p className="font-medium">{threat.analysis.overall_sentiment}</p>
+                      <p className="font-medium">{post.analysis.overall_sentiment}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Compound Score</p>
-                      <p className="font-medium">{threat.analysis.compound_score.toFixed(4)}</p>
+                      <p className="font-medium">{post.analysis.compound_score.toFixed(4)}</p>
                     </div>
                   </div>
 
@@ -94,15 +94,15 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <p className="text-xs text-muted-foreground">Positive</p>
-                        <p className="font-medium">{threat.analysis.positive_score.toFixed(3)}</p>
+                        <p className="font-medium">{post.analysis.positive_score.toFixed(3)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Negative</p>
-                        <p className="font-medium">{threat.analysis.negative_score.toFixed(3)}</p>
+                        <p className="font-medium">{post.analysis.negative_score.toFixed(3)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Neutral</p>
-                        <p className="font-medium">{threat.analysis.neutral_score.toFixed(3)}</p>
+                        <p className="font-medium">{post.analysis.neutral_score.toFixed(3)}</p>
                       </div>
                     </div>
                   </div>
@@ -120,12 +120,12 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Source</p>
-                    <p>{threat.source}</p>
+                    <p>{post.source}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Original Link</p>
                     <a
-                      href={threat.link}
+                      href={post.link}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline flex items-center"
@@ -140,12 +140,12 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Username</p>
-                    <p>{threat.username}</p>
+                    <p>{post.username}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">User Profile</p>
                     <a
-                      href={threat.userlink}
+                      href={post.userlink}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline flex items-center"
@@ -164,7 +164,7 @@ export function ThreatDetail({ threat }: ThreatDetailProps) {
         <div>
           <h2 className="text-lg font-semibold mb-2">Original Content</h2>
           <div className="rounded-md border p-4 bg-muted/20">
-            <p className="text-muted-foreground whitespace-pre-line">{threat.content || "No content available"}</p>
+            <p className="text-muted-foreground whitespace-pre-line">{post.content || "No content available"}</p>
           </div>
         </div>
       </div>

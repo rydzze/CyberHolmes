@@ -1,4 +1,4 @@
-export interface Threat {
+export interface Post {
   id: number
   title: string
   link: string
@@ -10,7 +10,7 @@ export interface Threat {
   spider: number
   analysis?: {
     id: number
-    threat: string
+    threat: boolean
     confidence: number
     overall_sentiment: string
     positive_score: number

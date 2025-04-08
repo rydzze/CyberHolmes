@@ -1,39 +1,39 @@
 "use client"
 
 import * as React from "react"
-import { ThreatList } from "@/components/features/analysis/threat-list"
-import { ThreatDetail } from "@/components/features/analysis/threat-detail"
-import type { Threat } from "@/lib/types/threat"
-import { fetchAllThreats } from "@/lib/api/threats"
+import { PostList } from "@/components/features/analysis/post-list"
+import { PostDetail } from "@/components/features/analysis/post-detail"
+import type { Post } from "@/lib/types/post"
+import { fetchAllPosts } from "@/lib/api/post"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
 export function AnalysisPage() {
-  const [allThreats, setAllThreats] = React.useState<Threat[]>([])
-  const [filteredThreats, setFilteredThreats] = React.useState<Threat[]>([])
-  const [selectedThreat, setSelectedThreat] = React.useState<Threat | null>(null)
+  const [allPosts, setAllPosts] = React.useState<Post[]>([])
+  const [filteredPosts, setFilteredPosts] = React.useState<Post[]>([])
+  const [selectedPost, setSelectedPost] = React.useState<Post | null>(null)
   const [searchTerm, setSearchTerm] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
-  // Fetch all threats when component mounts
+  // Fetch all posts when component mounts
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        const threats = await fetchAllThreats()
-        setAllThreats(threats)
-        setFilteredThreats(threats)
+        const posts = await fetchAllPosts()
+        setAllPosts(posts)
+        setFilteredPosts(posts)
 
-        // Select the first threat if none is selected
-        if (threats.length > 0 && !selectedThreat) {
-          setSelectedThreat(threats[0])
+        // Select the first post if none is selected
+        if (posts.length > 0 && !selectedPost) {
+          setSelectedPost(posts[0])
         }
       } catch (err) {
-        setError("Failed to fetch threat data. Please try again later.")
+        setError("Failed to fetch post data. Please try again later.")
         console.error(err)
       } finally {
         setIsLoading(false)
@@ -43,28 +43,28 @@ export function AnalysisPage() {
     fetchData()
   }, [])
 
-  // Filter threats based on search term
+  // Filter posts based on search term
   React.useEffect(() => {
     if (searchTerm.trim() === "") {
-      setFilteredThreats(allThreats)
+      setFilteredPosts(allPosts)
     } else {
       const lowercaseSearch = searchTerm.toLowerCase()
-      const filtered = allThreats.filter(
-        (threat) =>
-          threat.title?.toLowerCase().includes(lowercaseSearch) ||
-          (threat.content ? threat.content.toLowerCase().includes(lowercaseSearch) : false),
+      const filtered = allPosts.filter(
+        (post) =>
+          post.title?.toLowerCase().includes(lowercaseSearch) ||
+          (post.content ? post.content.toLowerCase().includes(lowercaseSearch) : false),
       )
-      setFilteredThreats(filtered)
+      setFilteredPosts(filtered)
     }
-  }, [searchTerm, allThreats])
+  }, [searchTerm, allPosts])
 
-  // Function to handle threat selection
-  const handleSelectThreat = (threat: Threat) => {
-    setSelectedThreat(threat)
+  // Function to handle post selection
+  const handleSelectPost = (post: Post) => {
+    setSelectedPost(post)
   }
 
   // Show loading state
-  if (isLoading && filteredThreats.length === 0) {
+  if (isLoading && filteredPosts.length === 0) {
     return (
       <div className="flex h-[calc(100vh-4rem)]">
         <div className="w-1/4 border-r flex flex-col">
@@ -116,16 +116,16 @@ export function AnalysisPage() {
   return (
     <div className="flex h-[calc(100vh-4rem)]">
       <div className="w-1/4 border-r">
-        <ThreatList
-          threats={filteredThreats}
-          selectedThreat={selectedThreat}
-          onSelectThreat={handleSelectThreat}
+        <PostList
+          posts={filteredPosts}
+          selectedPost={selectedPost}
+          onSelectPost={handleSelectPost}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           isLoading={isLoading}
         />
       </div>
-      <div className="w-3/4">{selectedThreat && <ThreatDetail threat={selectedThreat} />}</div>
+      <div className="w-3/4">{selectedPost && <PostDetail post={selectedPost} />}</div>
     </div>
   )
 }

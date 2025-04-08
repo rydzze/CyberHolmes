@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import type { CrawlerRecord } from "@/lib/types/crawler"
-import { fetchAllCrawlerRecords } from "@/lib/api/crawlers"
+import { fetchAllCrawlerRecords } from "@/lib/api/crawler"
 
 export function RecordsPage() {
   const [searchTerm, setSearchTerm] = React.useState("")
@@ -60,7 +60,7 @@ export function RecordsPage() {
   // Filter records based on search term and status filter
   const filteredRecords = records.filter((record) => {
     const matchesSearch =
-      record.spider_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.keyword.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === "all" || record.status === statusFilter
@@ -269,7 +269,7 @@ export function RecordsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Spider</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Keyword</TableHead>
                   <TableHead>Start Time</TableHead>
                   <TableHead>End Time</TableHead>
@@ -291,7 +291,7 @@ export function RecordsPage() {
                       onClick={() => handleRowClick(record)}
                     >
                       <TableCell>{record.id}</TableCell>
-                      <TableCell className="font-medium">{record.spider_name}</TableCell>
+                      <TableCell className="font-medium">{record.source}</TableCell>
                       <TableCell>{record.keyword}</TableCell>
                       <TableCell>{formatDate(record.start_time)}</TableCell>
                       <TableCell>{formatDate(record.end_time)}</TableCell>
@@ -383,7 +383,7 @@ export function RecordsPage() {
           <DialogHeader>
             <DialogTitle>Crawler Record Details</DialogTitle>
             <DialogDescription>
-              {selectedRecord && `Details for ${selectedRecord.spider_name} execution`}
+              {selectedRecord && `Details for ${selectedRecord.source} execution`}
             </DialogDescription>
           </DialogHeader>
 
@@ -395,8 +395,8 @@ export function RecordsPage() {
                   <p>{selectedRecord.id}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Spider Name</h4>
-                  <p>{selectedRecord.spider_name}</p>
+                  <h4 className="text-sm font-medium text-muted-foreground">Source</h4>
+                  <p>{selectedRecord.source}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground">Keyword</h4>

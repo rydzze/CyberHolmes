@@ -1,8 +1,8 @@
-import type { Threat } from "@/lib/types/threat"
+import type { Post } from "@/lib/types/post"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
-export async function fetchAllThreats(): Promise<Threat[]> {
+export async function fetchAllPosts(): Promise<Post[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/analysis_records/`, {
       method: 'GET',
@@ -18,7 +18,7 @@ export async function fetchAllThreats(): Promise<Threat[]> {
     const data = await response.json()
     return data
   } catch (error) {
-    console.error("Error fetching threats:", error)
+    console.error("Error fetching posts:", error)
     throw error
   }
 }

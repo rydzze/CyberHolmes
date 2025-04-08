@@ -5,33 +5,33 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import type { Threat } from "@/lib/types/threat"
-import { formatDate, getConfidenceBadge } from "@/lib/utils/threat"
+import type { Post } from "@/lib/types/post"
+import { formatDate, getConfidenceBadge } from "@/lib/utils/post"
 
-interface ThreatListProps {
-  threats: Threat[]
-  selectedThreat: Threat | null
-  onSelectThreat: (threat: Threat) => void
+interface PostListProps {
+  posts: Post[]
+  selectedPost: Post | null
+  onSelectPost: (post: Post) => void
   searchTerm: string
   onSearchChange: (value: string) => void
   isLoading: boolean
 }
 
-export function ThreatList({
-  threats,
-  selectedThreat,
-  onSelectThreat,
+export function PostList({
+  posts,
+  selectedPost,
+  onSelectPost,
   searchTerm,
   onSearchChange,
   isLoading,
-}: ThreatListProps) {
+}: PostListProps) {
   const [confidenceFilter, setConfidenceFilter] = useState<string | null>(null)
 
-  // Update the filteredThreats filter function to handle null content
-  const filteredThreats = threats.filter((threat) => {
+  // Update the filteredPosts filter function to handle null content
+  const filteredPosts = posts.filter((post) => {
     // Apply confidence filter
     if (confidenceFilter) {
-      const confidence = threat.analysis?.confidence || 0
+      const confidence = post.analysis?.confidence || 0
       const confidenceDecimal = confidence > 1 ? confidence / 100 : confidence
 
       switch (confidenceFilter) {
@@ -83,7 +83,7 @@ export function ThreatList({
               <DropdownMenuItem onClick={() => setConfidenceFilter("neutral")}>Neutral</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="text-xs text-muted-foreground pt-2">{filteredThreats.length} results found</div>
+          <div className="text-xs text-muted-foreground pt-2">{filteredPosts.length} results found</div>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export function ThreatList({
                 </div>
               ))}
           </div>
-        ) : filteredThreats.length === 0 ? (
+        ) : filteredPosts.length === 0 ? (
           <div className="flex h-full items-center justify-center p-4 text-center">
             <div>
               <p className="text-muted-foreground">No results found</p>
@@ -111,22 +111,22 @@ export function ThreatList({
             </div>
           </div>
         ) : (
-          filteredThreats.map((threat) => (
+          filteredPosts.map((post) => (
             <div
-              key={threat.id}
-              className={`p-3 border-b cursor-pointer hover:bg-muted/50 ${selectedThreat?.id === threat.id ? "bg-muted" : ""}`}
-              onClick={() => onSelectThreat(threat)}
+              key={post.id}
+              className={`p-3 border-b cursor-pointer hover:bg-muted/50 ${selectedPost?.id === post.id ? "bg-muted" : ""}`}
+              onClick={() => onSelectPost(post)}
             >
               <div className="flex items-start justify-between">
-                <h3 className="font-medium text-sm line-clamp-1">{threat.title}</h3>
+                <h3 className="font-medium text-sm line-clamp-1">{post.title}</h3>
               </div>
               <div className="flex items-center gap-2 mt-2">
                 {/* Enhanced capsule badge with better visibility */}
-                <div className="flex-shrink-0">{threat.analysis && getConfidenceBadge(threat.analysis.confidence)}</div>
-                <span className="text-xs text-muted-foreground ml-2">{formatDate(threat.timestamp)}</span>
+                <div className="flex-shrink-0">{post.analysis && getConfidenceBadge(post.analysis.confidence)}</div>
+                <span className="text-xs text-muted-foreground ml-1">{formatDate(post.timestamp)}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                {threat.content || "No content available"}
+                {post.content?.slice(0, 250) || "No content available"}
               </p>
             </div>
           ))

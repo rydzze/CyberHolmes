@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { deployCrawler } from "@/lib/api/crawlers"
+import { deployCrawler } from "@/lib/api/crawler"
 
-// Define platform options
-const PLATFORMS = [
+// Define source options
+const SOURCES = [
   {
     id: "Reddit",
     name: "Clear Web - Reddit",
@@ -20,8 +20,8 @@ const PLATFORMS = [
   },
   {
     id: "DarkNet Army",
-    name: "Dark Web - Darknet Army",
-    description: "Crawls Darknet Army forum posts published within the last month. Scheduled to run monthly.",
+    name: "Dark Web - DarkNet Army",
+    description: "Crawls DarkNet Army forum posts published within the last month. Scheduled to run monthly.",
     type: "dark_web",
   },
   {
@@ -33,14 +33,14 @@ const PLATFORMS = [
 ]
 
 export function DeployPage() {
-  const [platform, setPlatform] = React.useState("")
+  const [source, setSource] = React.useState("")
   const [keyword, setKeyword] = React.useState("")
   const [isDeploying, setIsDeploying] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState<string | null>(null)
 
-  // Get the selected platform details
-  const selectedPlatform = PLATFORMS.find((p) => p.id === platform)
+  // Get the selected source details
+  const selectedSource = SOURCES.find((p) => p.id === source)
 
   // Handle form submission
   const handleDeploy = async () => {
@@ -50,8 +50,8 @@ export function DeployPage() {
       setSuccess(null)
 
       // Validate form
-      if (!platform) {
-        throw new Error("Please select a platform")
+      if (!source) {
+        throw new Error("Please select a source")
       }
       if (!keyword.trim()) {
         throw new Error("Please enter a keyword")
@@ -59,15 +59,15 @@ export function DeployPage() {
 
       // Use the API function to deploy crawler
       await deployCrawler({
-        spider_name: selectedPlatform?.id || "",
+        source: selectedSource?.id || "",
         keyword: keyword.trim(),
       })
 
       // Show success message
-      setSuccess(`Successfully deployed ${selectedPlatform?.name} crawler with keyword "${keyword}"`)
+      setSuccess(`Successfully deployed ${selectedSource?.name} crawler with keyword "${keyword}"`)
 
       // Reset form
-      setPlatform("")
+      setSource("")
       setKeyword("")
     } catch (err) {
       console.error("Error deploying crawler:", err)
@@ -103,15 +103,15 @@ export function DeployPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="platform">Platform</Label>
-            <Select value={platform} onValueChange={setPlatform}>
-              <SelectTrigger id="platform">
-                <SelectValue placeholder="Select platform to crawl" />
+            <Label htmlFor="source">Source</Label>
+            <Select value={source} onValueChange={setSource}>
+              <SelectTrigger id="source">
+                <SelectValue placeholder="Select source to crawl" />
               </SelectTrigger>
               <SelectContent>
-                {PLATFORMS.map((platform) => (
-                  <SelectItem key={platform.id} value={platform.id}>
-                    {platform.name}
+                {SOURCES.map((source) => (
+                  <SelectItem key={source.id} value={source.id}>
+                    {source.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -128,10 +128,10 @@ export function DeployPage() {
             />
           </div>
 
-          {selectedPlatform && (
+          {selectedSource && (
             <div className="rounded-md bg-muted p-4 mt-4">
               <h4 className="text-sm font-medium mb-2">Crawler Information</h4>
-              <p className="text-sm text-muted-foreground">{selectedPlatform.description}</p>
+              <p className="text-sm text-muted-foreground">{selectedSource.description}</p>
             </div>
           )}
         </CardContent>
@@ -144,13 +144,13 @@ export function DeployPage() {
           <CardDescription>Review and deploy your configured crawler</CardDescription>
         </CardHeader>
         <CardContent>
-          {!selectedPlatform ? (
+          {!selectedSource ? (
             <div className="flex h-[200px] items-center justify-center text-center">
               <div className="max-w-md space-y-2">
                 <Spider className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="text-lg font-medium">No Platform Selected</h3>
+                <h3 className="text-lg font-medium">No Source Selected</h3>
                 <p className="text-sm text-muted-foreground">
-                  Select a platform and enter a keyword to configure your crawler
+                  Select a source and enter a keyword to configure your crawler
                 </p>
               </div>
             </div>
@@ -158,16 +158,13 @@ export function DeployPage() {
             <div className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium">Selected Platform</h3>
+                  <h3 className="text-lg font-medium">Selected Source</h3>
                   <div className="flex items-center mt-2">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                       <Spider className="h-5 w-5 text-primary" />
                     </div>
                     <div className="ml-3">
-                      <p className="font-medium">{selectedPlatform.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedPlatform.type === "dark_web" ? "Dark Web Platform" : "Clear Web Platform"}
-                      </p>
+                      <p className="font-medium">{selectedSource.name}</p>
                     </div>
                   </div>
                 </div>
@@ -185,14 +182,14 @@ export function DeployPage() {
 
                 <div>
                   <h3 className="text-lg font-medium">Crawler Behavior</h3>
-                  <p className="mt-2 text-sm">{selectedPlatform.description}</p>
+                  <p className="mt-2 text-sm">{selectedSource.description}</p>
                 </div>
               </div>
             </div>
           )}
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={handleDeploy} disabled={!platform || !keyword.trim() || isDeploying}>
+          <Button className="w-full" onClick={handleDeploy} disabled={!source || !keyword.trim() || isDeploying}>
             {isDeploying ? (
               <>
                 <RotateCw className="mr-2 h-4 w-4 animate-spin" />
