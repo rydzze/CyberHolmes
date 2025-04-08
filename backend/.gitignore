@@ -14,3 +14,4 @@ crawler/crawler/spiders/__pycache__
 /main/management/commands/__pycache__
 
 /venv
+/.env

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from main.models import Spider, Post, Analysis
+from .models import Spider, Post, Analysis
 
 class SpiderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,7 +17,7 @@ class AnalysisSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PostWithAnalysisSerializer(serializers.ModelSerializer):
-    source = serializers.CharField(source='spider.spider_name', read_only=True)
+    source = serializers.CharField(source='spider.source', read_only=True)
     analysis = AnalysisSerializer(read_only=True)
     
     class Meta:

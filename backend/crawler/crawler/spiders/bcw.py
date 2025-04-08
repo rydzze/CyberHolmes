@@ -7,6 +7,14 @@ from datetime import datetime, timezone
 from scrapy import signals
 
 class BCWSpider(scrapy.Spider):
+    """
+    A Scrapy Spider designed for crawling posts on Best Carding World forum using TOR.
+
+    This spider performs a search based on a provided keyword, navigates paginated 
+    search result pages, and processes individual posts to extract details such as 
+    title, content, timestamp, and user information.
+    """
+
     name = "Best Carding World"
 
     def __init__(self, keyword=None, *args, **kwargs):
@@ -35,6 +43,22 @@ class BCWSpider(scrapy.Spider):
         yield scrapy.Request("https://check.torproject.org", callback=self.parse)
 
     def parse(self, response):
+        """
+        Parse the TOR check response and crawl the target search page.
+        
+        This method creates a TOR session using RequestsTor to fetch the target URL.
+        It extracts post links from the search results, processes each post using
+        `parse_post()`, and handles pagination by updating the target URL until 
+        no additional pages are detected.
+        
+        Args:
+            response: The response from the TOR check page.
+        
+        Yields:
+            scrapy.Request objects for individual posts via `parse_post()`.
+            Final request to trigger the end() callback when pagination ends.
+        """
+        
         while True:
             self.logger.info(f"Starting request with URL: {self.target_url}")
             self.tor_session = RequestsTor(tor_ports=(9050,), tor_cport=9051)
@@ -63,6 +87,21 @@ class BCWSpider(scrapy.Spider):
         yield scrapy.Request("https://www.torproject.org/", callback=self.end)
 
     def parse_post(self, post_link, selector):
+        """
+        Parse an individual post page and extract details.
+        
+        Extracts information such as the post title, content, timestamp, author name,
+        and author profile link. It also converts the timestamp string into an ISO
+        formatted date with UTC timezone.
+        
+        Args:
+            post_link (str): The URL of the post.
+            selector (Selector): Scrapy selector containing the HTML of the post page.
+        
+        Yields:
+            Post: A populated Post item with the extracted fields.
+        """
+
         self.logger.info(f"Processing post: {post_link}")
 
         try:

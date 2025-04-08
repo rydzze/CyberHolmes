@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from analysis.loader import Model
 from analysis.functions import predict_threat, analyse_sentiment
-from main.models import Post, Analysis
+from .models import Post, Analysis
 
 logger = logging.getLogger(__name__)
 

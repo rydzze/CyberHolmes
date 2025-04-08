@@ -10,7 +10,7 @@ class Post(scrapy.Item):
     spider_id = scrapy.Field()
 
 class Spider(scrapy.Item):
-    platform = scrapy.Field()
+    source = scrapy.Field()
     keyword = scrapy.Field()
     start_time = scrapy.Field()
     end_time = scrapy.Field()

@@ -6,6 +6,13 @@ from crawler.items import Post
 from scrapy import signals
 
 class DNASpider(scrapy.Spider):
+    """
+    A Scrapy Spider designed for crawling posts on DarkNet Army forum using TOR.
+    
+    This spider searches for posts based on a provided keyword, navigates the website via TOR,
+    and extracts post details such as title, content, timestamp, and author information.
+    """
+
     name = "DarkNet Army"
 
     def __init__(self, keyword=None, *args, **kwargs):
@@ -34,6 +41,20 @@ class DNASpider(scrapy.Spider):
         yield scrapy.Request("https://check.torproject.org", callback=self.parse)
     
     def parse(self, response):
+        """
+        Parse the initial TOR check response and initiate crawling of the target darknet site.
+
+        This method sets up a RequestsTor session to query the darknet target URL,
+        extracts post links, and iteratively processes each post via the parse_post method.
+
+        Args:
+            response: The response from the initial TOR check page.
+
+        Yields:
+            scrapy.Request: Requests to parse individual posts.
+            Final request to end the spider via the end() method.
+        """
+
         self.logger.info(f"Starting request with URL: {self.target_url}")
         self.tor_session = RequestsTor(tor_ports=(9050,), tor_cport=9051)
         tor_response = self.tor_session.get(self.target_url)
@@ -53,6 +74,20 @@ class DNASpider(scrapy.Spider):
         yield scrapy.Request("https://www.torproject.org/", callback=self.end)
 
     def parse_post(self, post_link, selector):
+        """
+        Extract detailed information from an individual darknet post.
+
+        This method retrieves fields like title, content, timestamp, and user details,
+        stores them into a Post item, and yields the item for storage.
+
+        Args:
+            post_link (str): The URL of the individual post.
+            selector (Selector): A Scrapy selector built from the post page's HTML.
+
+        Yields:
+            Post: The populated post item.
+        """
+        
         self.logger.info(f"Processing post: {post_link}")
 
         try:

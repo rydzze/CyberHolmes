@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 class Spider(models.Model):
-    spider_name = models.CharField(max_length=255)
+    source = models.CharField(max_length=255)
     keyword = models.CharField(max_length=255, null=True)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True)
@@ -25,7 +25,7 @@ class Post(models.Model):
 
 class Analysis(models.Model):
     post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='analysis')
-    threat = models.TextField(null=True, blank=True)
+    threat = models.BooleanField(null=True, blank=True)
     confidence = models.FloatField(null=True, blank=True)
     overall_sentiment = models.TextField(null=True, blank=True)
     positive_score = models.FloatField(null=True, blank=True)

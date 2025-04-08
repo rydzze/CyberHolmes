@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 import sys
+import environ
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,11 +24,11 @@ os.environ['SCRAPY_SETTINGS_MODULE'] = 'crawler.settings'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dv7sj0p!gj)tg$k=zp77cb-%wkty42vwmg8a43j@u_-e-s=7^4'
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
+SECRET_KEY = env('SECRET_KEY')
 
 ALLOWED_HOSTS = []
 
@@ -45,7 +46,6 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'main.apps.MainConfig',
-    'api',
 ]
 
 MIDDLEWARE = [

@@ -4,6 +4,13 @@ from crawler.items import Post
 from scrapy import signals
 
 class RedditSpider(scrapy.Spider):
+    """
+    A Scrapy Spider for crawling Reddit search results based on a given keyword.
+
+    This spider targets the old Reddit search pages and extracts posts containing comments.
+    It supports pagination and avoids processing duplicate posts.
+    """
+     
     name = 'Reddit'
 
     def __init__(self, keyword=None, *args, **kwargs):
@@ -32,6 +39,21 @@ class RedditSpider(scrapy.Spider):
         yield scrapy.Request(url, callback=self.parse)
 
     def parse(self, response):
+        """
+        Parse the search results page to extract post links and handle pagination.
+        
+        This method extracts links to posts that contain 'comment' in their URL and ensures
+        they have not been processed already using the seen_links set. It also follows the "next page" links
+        if available.
+        
+        Args:
+            response: The HTTP response for the search results page.
+        
+        Yields:
+            scrapy.Request: Requests for individual posts to be processed by parse_post.
+            Response for the next page when pagination is detected.
+        """
+
         self.logger.info(f"Parsing posts in page: {response.url}")
         links = response.css('div.search-result-group a::attr(href)')
         
@@ -51,6 +73,19 @@ class RedditSpider(scrapy.Spider):
             self.logger.info("No more pages available. Stopping spider.")
 
     def parse_post(self, response):
+        """
+        Parse an individual Reddit post to extract detailed information.
+
+        Extracts relevant information such as title, content, timestamp, author details,
+        and assembles the data into a Post item.
+        
+        Args:
+            response: The HTTP response for the individual post page.
+        
+        Yields:
+            Post: The populated item containing post details.
+        """
+
         post_link = response.meta.get('post_link')
         self.logger.info(f"Processing post: {post_link}")
 
