@@ -32,3 +32,10 @@ class Analysis(models.Model):
     negative_score = models.FloatField(null=True, blank=True)
     neutral_score = models.FloatField(null=True, blank=True)
     compound_score = models.FloatField(null=True, blank=True)
+    cvss_vector = models.TextField(null=True, blank=True)
+    cvss_base_score = models.FloatField(null=True, blank=True)
+    cvss_rating = models.TextField(null=True, blank=True)
+    mitre_techniques = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-post__id']

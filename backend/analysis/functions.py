@@ -1,9 +1,14 @@
 import re
 import html
+import json
+import torch
 import contractions
-from nltk import pos_tag, word_tokenize
+from cvss import CVSS4
+from nltk import pos_tag, word_tokenize, sent_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
+from .loader import Model
+from .cvssv4_metrics import CVSSV4_METRICS
 
 # Initialize the WordNet lemmatizer
 lemmatizer = WordNetLemmatizer()
@@ -61,51 +66,17 @@ def preprocess_text(text):
     
     return ' '.join(tokens)
 
-def predict_threat(model, text):
-    """
-    Process input text and predict whether it is considered a threat by the given model.
-    
-    The function preprocesses the text, obtains a binary prediction, and calculates the confidence level.
-    
-    Args:
-        model: A trained classification model that supports .predict and .predict_proba methods.
-        text (str): The raw input text to analyze.
-        
-    Returns:
-        tuple: A pair consisting of:
-            - threat (bool): True if the text is predicted to be a threat; otherwise, False.
-            - confidence (float): Prediction confidence percentage for the threat class.
-    """
-
+def predict_threat(text, model=Model.ml_model):
     processed_text = preprocess_text(text)
     prediction = model.predict([processed_text])[0]
     probability = model.predict_proba([processed_text])[0]
 
     threat = True if prediction == 1 else False
-    confidence = round(probability[1] * 100, 2)
+    confidence = round(probability[1] * 100, 2) if threat else round(probability[0] * 100, 2)
 
     return threat, confidence
 
-def analyse_sentiment(sentiment_analyzer, text):
-    """
-    Analyze the sentiment of the input text using the provided sentiment analyser.
-    
-    Determines overall sentiment as Positive, Negative, or Neutral based on the compound score,
-    along with providing individual scores for positive, negative, neutral, and the compound score.
-    
-    Args:
-        sentiment_analyzer: An instance of a sentiment analysis tool that has a method `polarity_scores`.
-        text (str): The raw input text to analyze.
-    
-    Returns:
-        tuple: A set of sentiment metrics including:
-            - overall_sentiment (str): 'Positive', 'Negative', or 'Neutral' based on the compound score.
-            - positive_score (float): Proportion of the text that is positive.
-            - negative_score (float): Proportion of the text that is negative.
-            - neutral_score (float): Proportion of the text that is neutral.
-            - compound_score (float): Normalized compound score of sentiment ranging from -1 (most extreme negative) to 1 (most extreme positive).
-    """
-    
+def analyse_sentiment(text, sentiment_analyzer=Model.sentiment_analyser):
     sentiment_scores = sentiment_analyzer.polarity_scores(text)
     
     compound_score = sentiment_scores['compound']
@@ -121,3 +92,73 @@ def analyse_sentiment(sentiment_analyzer, text):
     neutral_score = sentiment_scores['neu']
 
     return overall_sentiment, positive_score, negative_score, neutral_score, compound_score
+
+def get_embedding(text, tokenizer, model):
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        
+    embeddings = outputs.last_hidden_state
+    attention_mask = inputs['attention_mask']
+    mask_expanded = attention_mask.unsqueeze(-1).expand(embeddings.size()).float()
+
+    summed = torch.sum(embeddings * mask_expanded, 1)
+    counted = torch.clamp(mask_expanded.sum(1), min=1e-9)
+
+    return summed / counted
+
+def generate_CVSSv4(text, CVSSV4_METRICS=CVSSV4_METRICS, tokenizer=Model.secbert_tokenizer, model=Model.secbert_model):
+    prompt_metric_value = list(CVSSV4_METRICS.keys())
+    prompt_description = list(CVSSV4_METRICS.values())
+    prompt_embeddings = torch.stack([get_embedding(text, tokenizer, model).squeeze(0) for text in prompt_description])
+
+    sentences = sent_tokenize(text)
+    cvss_values = {
+        "AV": [], "AC": [], "AT": [], "PR ": [], "UI": [],
+        "VC": [], "SC": [], "VI": [], "SI": [], "VA": [], "SA": [],
+        "E": [], "CR": [], "IR": [], "AR": []
+    }
+    cvss_default_values = {
+        "AV": "AV:P", "AC": "AC:L", "AT": "AT:N", "PR ": "PR:N", "UI": "UI:N",
+        "VC": "VC:N", "SC": "SC:N", "VI": "VI:N", "SI": "SI:N", "VA": "VA:N", "SA": "SA:N",
+        "E": "E:X", "CR": "CR:X", "IR": "IR:X", "AR": "AR:X"
+    }
+    cvss_vector_parts = []
+
+    for sentence in sentences:
+        sentence_embedding = get_embedding(sentence, tokenizer, model).squeeze(0)
+        cosine_scores = torch.nn.functional.cosine_similarity(sentence_embedding.unsqueeze(0), prompt_embeddings)
+        sorted_scores = sorted(zip(prompt_metric_value, cosine_scores), key=lambda x: x[1], reverse=True)
+
+        for key, score in sorted_scores:
+            metric = key.split(":")[0]
+            if metric in cvss_values and key not in [x[0] for x in cvss_values[metric]]:
+                cvss_values[metric].append((key, score.item()))
+                break
+
+    for metric in cvss_default_values:
+        if cvss_values[metric]:
+            best_match = sorted(cvss_values[metric], key=lambda x: x[1], reverse=True)[0][0]
+        else:
+            best_match = cvss_default_values[metric]
+        cvss_vector_parts.append(best_match)
+
+    cvss_vector = "CVSS:4.0/" + "/".join(cvss_vector_parts)
+    cvss = CVSS4(cvss_vector)
+
+    return cvss_vector, cvss.base_score, cvss.severity
+
+def get_MITRE_techniques(text, top_n=10, mitre_embeddings=Model.mitre_embeddings, tokenizer=Model.secbert_tokenizer, model=Model.secbert_model):
+    post_embedding = get_embedding(text, tokenizer, model).squeeze(0)
+
+    mitre_techniques = []
+    for mitre_id, mitre_name, emb in mitre_embeddings:
+        score = torch.nn.functional.cosine_similarity(post_embedding, emb, dim=0).item()
+        mitre_techniques.append({
+            "mitre_id": mitre_id,
+            "mitre_name": mitre_name,
+            "similarity_score": score
+        })
+    mitre_techniques.sort(key=lambda x: x["similarity_score"], reverse=True)
+
+    return json.dumps(mitre_techniques[:top_n], indent=4)

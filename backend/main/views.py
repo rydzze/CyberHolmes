@@ -1,5 +1,5 @@
 from django.db import close_old_connections
-from django.db.models import Count, Case, When, IntegerField
+from django.db.models import Count, Case, When, IntegerField, Q
 from django.utils import timezone
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -211,16 +211,16 @@ class AnalysisViewSet(viewsets.ModelViewSet):
         recent_post = Post.objects.filter(timestamp__gte=timeframe).values_list('id', flat=True)
 
         category_stats = Analysis.objects.filter(post_id__in=recent_post).aggregate(
-            critical=Count(Case(When(confidence__gt=85, then=1), output_field=IntegerField())),
-            high=Count(Case(When(confidence__gt=70, confidence__lte=85, then=1), output_field=IntegerField())),
-            medium=Count(Case(When(confidence__gt=60, confidence__lte=70, then=1), output_field=IntegerField())),
-            low=Count(Case(When(confidence__gt=50, confidence__lte=60, then=1), output_field=IntegerField())),
-            neutral=Count(Case(When(confidence__lte=50, then=1), output_field=IntegerField()))
+            critical=Count(Case(When(cvss_rating='Critical', then=1), output_field=IntegerField())),
+            high=Count(Case(When(cvss_rating='High', then=1), output_field=IntegerField())),
+            medium=Count(Case(When(cvss_rating='Medium', then=1), output_field=IntegerField())),
+            low=Count(Case(When(cvss_rating='Low', then=1), output_field=IntegerField())),
+            none=Count(Case(When(Q(cvss_rating__isnull=True) | Q(cvss_rating='None'), then=1), output_field=IntegerField()))
         )
 
         result = []        
-        severity_label = ['critical', 'high', 'medium', 'low', 'neutral']
-        for item in severity_label:
+        severity_labels = ['critical', 'high', 'medium', 'low', 'none']
+        for item in severity_labels:
             result.append({
                 "label": item,
                 "posts": category_stats[item],
