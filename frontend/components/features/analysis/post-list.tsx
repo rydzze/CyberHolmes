@@ -27,27 +27,12 @@ export function PostList({
 }: PostListProps) {
   const [confidenceFilter, setConfidenceFilter] = useState<string | null>(null)
 
-  // Update the filteredPosts filter function to handle null content
   const filteredPosts = posts.filter((post) => {
     // Apply confidence filter
     if (confidenceFilter) {
-      const confidence = post.analysis?.confidence || 0
-      const confidenceDecimal = confidence > 1 ? confidence / 100 : confidence
+      const rating = post.analysis?.cvss_rating?.toLowerCase() || "neutral"
 
-      switch (confidenceFilter) {
-        case "critical":
-          return confidenceDecimal > 0.85
-        case "high":
-          return confidenceDecimal > 0.7 && confidenceDecimal <= 0.85
-        case "medium":
-          return confidenceDecimal > 0.6 && confidenceDecimal <= 0.7
-        case "low":
-          return confidenceDecimal > 0.5 && confidenceDecimal <= 0.6
-        case "neutral":
-          return confidenceDecimal <= 0.5
-        default:
-          return true
-      }
+      return rating === confidenceFilter.toLowerCase()
     }
     return true
   })
@@ -122,7 +107,7 @@ export function PostList({
               </div>
               <div className="flex items-center gap-2 mt-2">
                 {/* Enhanced capsule badge with better visibility */}
-                <div className="flex-shrink-0">{post.analysis && getConfidenceBadge(post.analysis.confidence)}</div>
+                <div className="flex-shrink-0">{getConfidenceBadge(post.analysis?.cvss_rating)}</div>
                 <span className="text-xs text-muted-foreground ml-1">{formatDate(post.timestamp)}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">

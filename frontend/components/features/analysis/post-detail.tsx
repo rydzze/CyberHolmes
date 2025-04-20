@@ -1,28 +1,64 @@
 "use client"
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, ChevronDown } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import type { Post } from "@/lib/types/post"
 import { formatDate, getConfidenceBadge } from "@/lib/utils/post"
+import { useState } from "react"
 
 interface PostDetailProps {
   post: Post
 }
 
+// Helper function to get CVSS container colors based on rating
+const getCVSSContainerColors = (rating: string | undefined | null) => {
+  switch (rating?.toLowerCase()) {
+    case "critical":
+      return "border-red-300 bg-red-50 dark:border-red-800/50 dark:bg-red-900/20"
+    case "high":
+      return "border-red-200 bg-red-50/80 dark:border-red-800/30 dark:bg-red-900/10"
+    case "medium":
+      return "border-orange-200 bg-orange-50 dark:border-amber-800/30 dark:bg-amber-900/10"
+    case "low":
+      return "border-yellow-200 bg-yellow-50 dark:border-yellow-800/30 dark:bg-yellow-900/10"
+    default:
+      return "border-gray-200 bg-gray-50 dark:border-gray-800/30 dark:bg-gray-900/10"
+  }
+}
+
+// Helper function to get CVSS text colors based on rating
+const getCVSSTextColors = (rating: string | undefined | null) => {
+  switch (rating?.toLowerCase()) {
+    case "critical":
+      return "text-red-900 dark:text-red-200"
+    case "high":
+      return "text-red-800 dark:text-red-300"
+    case "medium":
+      return "text-orange-900 dark:text-orange-200"
+    case "low":
+      return "text-yellow-900 dark:text-yellow-200"
+    default:
+      return "text-gray-900 dark:text-gray-200"
+  }
+}
+
 export function PostDetail({ post }: PostDetailProps) {
+  const [isMitreExpanded, setIsMitreExpanded] = useState(false)
+
   if (!post) return null
 
-  // Get the confidence level for display in the analysis section
-  const confidenceDecimal = post.analysis?.confidence ? post.analysis.confidence / 100 : 0
-  const confidenceLevel =
-    confidenceDecimal > 0.85
-      ? "Critical"
-      : confidenceDecimal > 0.7
-        ? "High"
-        : confidenceDecimal > 0.6
-          ? "Medium"
-          : confidenceDecimal > 0.5
-            ? "Low"
-            : "Neutral"
+  // Parse MITRE techniques if available
+  let mitreTechniques = []
+  try {
+    if (post.analysis?.mitre_techniques) {
+      mitreTechniques = JSON.parse(post.analysis.mitre_techniques)
+    }
+  } catch (error) {
+    console.error("Error parsing MITRE techniques:", error)
+  }
+
+  const isThreat = post.analysis?.threat === true
 
   return (
     <div className="h-full overflow-auto">
@@ -30,9 +66,8 @@ export function PostDetail({ post }: PostDetailProps) {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{post.title}</h1>
-            {/* Display confidence badge based on analysis data */}
             <div className="flex-shrink-0 mt-1">
-              {post.analysis && getConfidenceBadge(post.analysis.confidence)}
+              {post.analysis && getConfidenceBadge(post.analysis.cvss_rating)}
             </div>
           </div>
           <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
@@ -49,12 +84,12 @@ export function PostDetail({ post }: PostDetailProps) {
         {/* Threat Prediction Section */}
         <div className="mb-6">
           <h2 className="text-lg font-semibold mb-2">Threat Prediction</h2>
-          {post.analysis?.threat === true ? (
+          {isThreat ? (
             <div className="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/20">
-              <p className="font-medium text-red-800 dark:text-red-400">{confidenceLevel} Threat Detected</p>
+              <p className="font-medium text-red-800 dark:text-red-400">Threat Detected</p>
               <p className="mt-1 text-sm text-red-700 dark:text-red-300">
                 This content has been identified as a potential security threat with a confidence score of{" "}
-                {post.analysis.confidence.toFixed(1)}%.
+                {post.analysis?.confidence.toFixed(1)}%.
               </p>
             </div>
           ) : (
@@ -67,6 +102,86 @@ export function PostDetail({ post }: PostDetailProps) {
             </div>
           )}
         </div>
+
+        {/* CVSS Evaluation Section */}
+        {isThreat && post.analysis?.cvss_vector && (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-2">Common Vulnerability Scoring System (CVSS) Evaluation</h2>
+            <div className={`rounded-md border p-4 ${getCVSSContainerColors(post.analysis.cvss_rating)}`}>
+              <p className={`${getCVSSTextColors(post.analysis.cvss_rating)}`}>
+                This threat has a{" "}
+                <span className="font-bold">{post.analysis.cvss_rating?.toLowerCase() || "neutral"}</span> severity rating with a
+                CVSS base score of{" "}
+                <span className="font-bold">{post.analysis.cvss_base_score?.toFixed(1) || "N/A"}</span>.
+              </p>
+
+              <div className={`mt-4 flex items-center space-x-4 ${getCVSSTextColors(post.analysis.cvss_rating)}`}>
+                <p className={`text-sm font-bold`}> CVSS Vector String </p>
+                <code className="block p-2 bg-black/5 dark:bg-white/5 rounded text-xs font-mono break-all">
+                  {post.analysis.cvss_vector}
+                </code>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MITRE Techniques Section */}
+        {isThreat && mitreTechniques.length > 0 && (
+          <div className="mb-6">
+            <div className="border-red-200 dark:border-red-900/50 rounded-md border overflow-hidden">
+              <div
+              // border-red-300 dark:border-red-700
+                className="p-4 border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 flex justify-between items-center cursor-pointer"
+                onClick={() => setIsMitreExpanded(!isMitreExpanded)}
+              >
+                <h2 className="text-lg font-semibold text-red-800 dark:text-red-400">Possible MITRE Techniques</h2>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 h-8 px-2 text-red-800 dark:text-red-400">
+                  {isMitreExpanded ? "Collapse" : "Expand"}
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isMitreExpanded ? "rotate-180" : ""}`} />
+                </Button>
+              </div>
+
+              {isMitreExpanded && (
+                <div className="border-t border-red-200 dark:border-red-900/50">
+                  <div className="bg-red-100 dark:bg-red-900/30 p-3 border-b border-red-200 dark:border-red-900/50 grid grid-cols-4 font-medium text-sm text-red-800 dark:text-red-300">
+                    <div>Technique ID</div>
+                    <div className="col-span-2">Technique Name</div>
+                    <div>Similarity</div>
+                  </div>
+
+                  <div className="overflow-y-auto bg-red-50 dark:bg-red-900/20">
+                    {mitreTechniques.map((technique, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 grid grid-cols-4 items-center ${index !== mitreTechniques.length - 1 ? "border-b border-red-100 dark:border-red-900/30" : ""}`}
+                      >
+                        <div>
+                          <Badge variant="outline" className="border-red-300 dark:border-red-700 text-red-800 dark:text-red-300">
+                            {technique.mitre_id}
+                          </Badge>
+                        </div>
+                        <div className="col-span-2">
+                          <a
+                            href={`https://attack.mitre.org/techniques/${technique.mitre_id.replace(".", "/")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-red-700 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:underline flex items-center"
+                          >
+                            {technique.mitre_name}
+                            <ExternalLink className="ml-1 h-3 w-3" />
+                          </a>
+                        </div>
+                        <div className="text-red-800 dark:text-red-300">
+                          {(technique.similarity_score * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Sentiment Analysis and Source Info side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

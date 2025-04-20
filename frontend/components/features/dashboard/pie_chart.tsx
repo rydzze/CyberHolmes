@@ -22,8 +22,8 @@ const chartConfig1 = {
   posts: {
     label: "Posts",
   },
-  neutral: {
-    label: "Neutral",
+  none: {
+    label: "None",
     color: "hsl(var(--neutral))",
   },
   low: {

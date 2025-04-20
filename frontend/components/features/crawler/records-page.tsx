@@ -112,13 +112,6 @@ export function RecordsPage() {
             Running
           </Badge>
         )
-      case "failed":
-        return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-            <AlertCircle className="mr-1 h-3 w-3" />
-            Failed
-          </Badge>
-        )
       default:
         return <Badge variant="outline">{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>
     }
@@ -258,7 +251,6 @@ export function RecordsPage() {
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="running">Running</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
                 </SelectContent>
               </Select>
             </div>

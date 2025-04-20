@@ -17,6 +17,10 @@ export interface Post {
     negative_score: number
     neutral_score: number
     compound_score: number
+    cvss_vector?: string
+    cvss_base_score?: number
+    cvss_rating?: string
+    mitre_techniques?: string
     post: number
   }
 }
