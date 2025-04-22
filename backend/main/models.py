@@ -35,7 +35,7 @@ class Analysis(models.Model):
     cvss_vector = models.TextField(null=True, blank=True)
     cvss_base_score = models.FloatField(null=True, blank=True)
     cvss_rating = models.TextField(null=True, blank=True)
-    mitre_techniques = models.JSONField(null=True, blank=True)
+    mitre_attack_techniques = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ['-post__id']

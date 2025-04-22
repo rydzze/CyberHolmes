@@ -1,7 +1,7 @@
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from analysis.functions import predict_threat, analyse_sentiment, generate_CVSSv4, get_MITRE_techniques
+from analysis.functions import predict_threat, analyse_sentiment, generate_CVSSv4, get_MITRE_ATTACK_techniques
 from .models import Post, Analysis
 
 logger = logging.getLogger(__name__)
@@ -25,14 +25,14 @@ def analyse_new_post(sender, instance, created, **kwargs):
                     (analysis.cvss_vector,
                      analysis.cvss_base_score,
                      analysis.cvss_rating) = generate_CVSSv4(text)
-                    analysis.mitre_techniques = None
+                    analysis.mitre_attack_techniques = None
                     if analysis.cvss_rating != "None":
-                        analysis.mitre_techniques = get_MITRE_techniques(text)
+                        analysis.mitre_attack_techniques = get_MITRE_ATTACK_techniques(text)
                 else:
                     analysis.cvss_vector = "N/A"
                     analysis.cvss_base_score = 0.0
                     analysis.cvss_rating = None
-                    analysis.mitre_techniques = None
+                    analysis.mitre_attack_techniques = None
 
                 analysis.save()
                 

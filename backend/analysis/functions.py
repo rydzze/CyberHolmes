@@ -148,17 +148,17 @@ def generate_CVSSv4(text, CVSSV4_METRICS=CVSSV4_METRICS, tokenizer=Model.secbert
 
     return cvss_vector, cvss.base_score, cvss.severity
 
-def get_MITRE_techniques(text, top_n=10, mitre_embeddings=Model.mitre_embeddings, tokenizer=Model.secbert_tokenizer, model=Model.secbert_model):
+def get_MITRE_ATTACK_techniques(text, top_n=10, mitre_attack_embeddings=Model.mitre_attack_embeddings, tokenizer=Model.secbert_tokenizer, model=Model.secbert_model):
     post_embedding = get_embedding(text, tokenizer, model).squeeze(0)
 
-    mitre_techniques = []
-    for mitre_id, mitre_name, emb in mitre_embeddings:
+    mitre_attack_techniques = []
+    for mitre_attack_id, mitre_attack_name, emb in mitre_attack_embeddings:
         score = torch.nn.functional.cosine_similarity(post_embedding, emb, dim=0).item()
-        mitre_techniques.append({
-            "mitre_id": mitre_id,
-            "mitre_name": mitre_name,
+        mitre_attack_techniques.append({
+            "id": mitre_attack_id,
+            "name": mitre_attack_name,
             "similarity_score": score
         })
-    mitre_techniques.sort(key=lambda x: x["similarity_score"], reverse=True)
+    mitre_attack_techniques.sort(key=lambda x: x["similarity_score"], reverse=True)
 
-    return json.dumps(mitre_techniques[:top_n], indent=4)
+    return json.dumps(mitre_attack_techniques[:top_n], indent=4)

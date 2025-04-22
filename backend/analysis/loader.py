@@ -10,7 +10,7 @@ class Model:
     sentiment_analyser = None
     secbert_model = None
     secbert_tokenizer = None
-    mitre_embeddings = None
+    mitre_attack_embeddings = None
 
     @classmethod
     def load_ml_model(cls):
@@ -34,30 +34,30 @@ class Model:
     
     @classmethod
     def init_MITRE_ATTACK_embeddings(cls, tokenizer, model):
-        if cls.mitre_embeddings is None:
-            embeddings_path = os.path.join(settings.BASE_DIR, 'analysis', 'mitre_embeddings.joblib')
+        if cls.mitre_attack_embeddings is None:
+            embeddings_path = os.path.join(settings.BASE_DIR, 'analysis', 'mitre_attack_embeddings.joblib')
 
             if os.path.exists(embeddings_path):
-                cls.mitre_embeddings = joblib.load(embeddings_path)
+                cls.mitre_attack_embeddings = joblib.load(embeddings_path)
             else:
                 from .functions import get_embedding
                 lift = attack_client()
                 enterprise_attack = lift.get_enterprise()
 
-                mitre_techniques = []
+                mitre_attack_techniques = []
                 for technique in enterprise_attack["techniques"]:
                     if technique.get("external_references") and technique.get("description"):
-                        mitre_techniques.append({
+                        mitre_attack_techniques.append({
                             "id": technique["external_references"][0]["external_id"],
                             "name": technique["name"],
                             "description": technique["description"]
                         })
 
-                cls.mitre_embeddings = []
-                for t in mitre_techniques:
+                cls.mitre_attack_embeddings = []
+                for t in mitre_attack_techniques:
                     embedding = get_embedding(t["description"], tokenizer, model).squeeze(0)
-                    cls.mitre_embeddings.append((t["id"], t["name"], embedding))
+                    cls.mitre_attack_embeddings.append((t["id"], t["name"], embedding))
 
-                joblib.dump(cls.mitre_embeddings, embeddings_path)
+                joblib.dump(cls.mitre_attack_embeddings, embeddings_path)
 
-        return cls.mitre_embeddings
+        return cls.mitre_attack_embeddings
