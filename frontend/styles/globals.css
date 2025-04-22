@@ -42,10 +42,13 @@
     --neu: 199, 89%, 48%;
     --neg: 0, 74%, 42%;
     
-    --clear-web: 173 58% 39%;
-    --dark-web: 12 76% 61%;
+    --post: 173 58% 39%;
     
-    --bar-chart: 173 58% 39%;
+    --horiz-bar-chart: 173 58% 39%;
+
+    --reddit: 25, 95%, 53%;
+    --darknet_army: 86, 78%, 27%;
+    --best_carding_world: 193, 82%, 31%;
 
     --radius: 0.5rem;
 

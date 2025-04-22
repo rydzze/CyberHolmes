@@ -11,7 +11,6 @@ interface PostDetailProps {
   post: Post
 }
 
-// Helper function to get CVSS container colors based on rating
 const getCVSSContainerColors = (rating: string | undefined | null) => {
   switch (rating?.toLowerCase()) {
     case "critical":
@@ -27,7 +26,6 @@ const getCVSSContainerColors = (rating: string | undefined | null) => {
   }
 }
 
-// Helper function to get CVSS text colors based on rating
 const getCVSSTextColors = (rating: string | undefined | null) => {
   switch (rating?.toLowerCase()) {
     case "critical":
@@ -44,15 +42,14 @@ const getCVSSTextColors = (rating: string | undefined | null) => {
 }
 
 export function PostDetail({ post }: PostDetailProps) {
-  const [isMitreExpanded, setIsMitreExpanded] = useState(false)
+  const [isMitreATTACKExpanded, setIsMitreATTACKExpanded] = useState(false)
 
   if (!post) return null
 
-  // Parse MITRE techniques if available
-  let mitreTechniques = []
+  let mitreAttackTechniques = []
   try {
-    if (post.analysis?.mitre_techniques) {
-      mitreTechniques = JSON.parse(post.analysis.mitre_techniques)
+    if (post.analysis?.mitre_attack_techniques) {
+      mitreAttackTechniques = JSON.parse(post.analysis.mitre_attack_techniques)
     }
   } catch (error) {
     console.error("Error parsing MITRE techniques:", error)
@@ -125,23 +122,22 @@ export function PostDetail({ post }: PostDetailProps) {
           </div>
         )}
 
-        {/* MITRE Techniques Section */}
-        {isThreat && mitreTechniques.length > 0 && (
+        {/* MITRE ATT&CK Techniques Section */}
+        {isThreat && mitreAttackTechniques.length > 0 && (
           <div className="mb-6">
             <div className="border-red-200 dark:border-red-900/50 rounded-md border overflow-hidden">
               <div
-              // border-red-300 dark:border-red-700
                 className="p-4 border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 flex justify-between items-center cursor-pointer"
-                onClick={() => setIsMitreExpanded(!isMitreExpanded)}
+                onClick={() => setIsMitreATTACKExpanded(!isMitreATTACKExpanded)}
               >
-                <h2 className="text-lg font-semibold text-red-800 dark:text-red-400">Possible MITRE Techniques</h2>
+                <h2 className="text-lg font-semibold text-red-800 dark:text-red-400">Possible MITRE ATT&CK Techniques</h2>
                 <Button variant="ghost" size="sm" className="flex items-center gap-1 h-8 px-2 text-red-800 dark:text-red-400">
-                  {isMitreExpanded ? "Collapse" : "Expand"}
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isMitreExpanded ? "rotate-180" : ""}`} />
+                  {isMitreATTACKExpanded ? "Collapse" : "Expand"}
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isMitreATTACKExpanded ? "rotate-180" : ""}`} />
                 </Button>
               </div>
 
-              {isMitreExpanded && (
+              {isMitreATTACKExpanded && (
                 <div className="border-t border-red-200 dark:border-red-900/50">
                   <div className="bg-red-100 dark:bg-red-900/30 p-3 border-b border-red-200 dark:border-red-900/50 grid grid-cols-4 font-medium text-sm text-red-800 dark:text-red-300">
                     <div>Technique ID</div>
@@ -150,24 +146,24 @@ export function PostDetail({ post }: PostDetailProps) {
                   </div>
 
                   <div className="overflow-y-auto bg-red-50 dark:bg-red-900/20">
-                    {mitreTechniques.map((technique, index) => (
+                    {mitreAttackTechniques.map((technique, index) => (
                       <div
                         key={index}
-                        className={`p-3 grid grid-cols-4 items-center ${index !== mitreTechniques.length - 1 ? "border-b border-red-100 dark:border-red-900/30" : ""}`}
+                        className={`p-3 grid grid-cols-4 items-center ${index !== mitreAttackTechniques.length - 1 ? "border-b border-red-100 dark:border-red-900/30" : ""}`}
                       >
                         <div>
                           <Badge variant="outline" className="border-red-300 dark:border-red-700 text-red-800 dark:text-red-300">
-                            {technique.mitre_id}
+                            {technique.id}
                           </Badge>
                         </div>
                         <div className="col-span-2">
                           <a
-                            href={`https://attack.mitre.org/techniques/${technique.mitre_id.replace(".", "/")}`}
+                            href={`https://attack.mitre.org/techniques/${technique.id.replace(".", "/")}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-red-700 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:underline flex items-center"
                           >
-                            {technique.mitre_name}
+                            {technique.name}
                             <ExternalLink className="ml-1 h-3 w-3" />
                           </a>
                         </div>

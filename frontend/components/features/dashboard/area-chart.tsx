@@ -1,29 +1,24 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CartesianGrid, Line, LineChart as RechartsLineChart, XAxis, YAxis } from "recharts"
-
+import { Area, AreaChart as RechartsAreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { fetchPostsOverTime } from "@/lib/api/dashboard"
-import { LineChartData } from "@/lib/types/dashboard"
+import { fetchPostsScrapedOverTime } from "@/lib/api/dashboard"
+import { type AreaChartData } from "@/lib/types/dashboard"
 
 const chartConfig = {
-  clear_web: {
-    label: "Clear Web",
-    color: "hsl(var(--clear-web))",
-  },
-  dark_web: {
-    label: "Dark Web",
-    color: "hsl(var(--dark-web))",
+  post: {
+    label: "Posts",
+    color: "hsl(var(--post))",
   },
 } satisfies ChartConfig
 
-export function LineChart() {
-  const [chartData, setChartData] = useState<LineChartData[]>([])
+export function PostScrapedOverTime() {
+  const [chartData, setChartData] = useState<AreaChartData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,7 +27,7 @@ export function LineChart() {
       try {
         setIsLoading(true)
         setError(null)
-        const data = await fetchPostsOverTime()
+        const data = await fetchPostsScrapedOverTime()
         setChartData(data)
       } catch (err) {
         setError("Failed to fetch time series data")
@@ -84,7 +79,7 @@ export function LineChart() {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <RechartsLineChart
+          <RechartsAreaChart
             accessibilityLayer
             data={chartData}
             margin={{
@@ -105,26 +100,18 @@ export function LineChart() {
             />
             <YAxis tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Line
-              dataKey="clear_web"
+            <Area
+              dataKey="post"
               type="monotone"
-              stroke="var(--color-clear_web)"
+              stroke="var(--color-post)"
+              fill="var(--color-post)"
+              fillOpacity={0.2}
               strokeWidth={2}
-              dot={{ fill: "var(--color-clear_web)", r: 4 }}
-              activeDot={{ r: 6 }}
+              activeDot={{ r: 5 }}
             />
-            <Line
-              dataKey="dark_web"
-              type="monotone"
-              stroke="var(--color-dark_web)"
-              strokeWidth={2}
-              dot={{ fill: "var(--color-dark_web)", r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </RechartsLineChart>
+          </RechartsAreaChart>
         </ChartContainer>
       </CardContent>
     </Card>
   )
 }
-

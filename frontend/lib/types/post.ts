@@ -20,7 +20,7 @@ export interface Post {
     cvss_vector?: string
     cvss_base_score?: number
     cvss_rating?: string
-    mitre_techniques?: string
+    mitre_attack_techniques?: string
     post: number
   }
 }

@@ -4,7 +4,12 @@ export interface SummaryStatsData {
   total_negative_sentiments: number
 }
 
-export interface BarChartData {
+export interface AreaChartData {
+  month: string
+  post: number
+}
+
+export interface HorizBarChartData {
   label: string
   value: number
 }
@@ -15,8 +20,9 @@ export interface PieChartData {
   fill: string
 }
 
-export interface LineChartData {
+export interface VertBarChartData {
   month: string
-  clear_web: number
-  dark_web: number
+  reddit: number
+  darknet_army: number
+  best_carding_world: number
 }

@@ -15,19 +15,19 @@ const SOURCES = [
   {
     id: "Reddit",
     name: "Clear Web - Reddit",
-    description: "Crawls Reddit posts published within the last hour. Scheduled to run every hour.",
+    description: "Crawls Reddit posts published within the last hour.",
     type: "clear_web",
   },
   {
     id: "DarkNet Army",
     name: "Dark Web - DarkNet Army",
-    description: "Crawls DarkNet Army forum posts published within the last month. Scheduled to run monthly.",
+    description: "Crawls DarkNet Army forum posts published within the last month/year.",
     type: "dark_web",
   },
   {
     id: "Best Carding World",
     name: "Dark Web - Best Carding World",
-    description: "Crawls Best Carding World forum posts published within the last year. Scheduled to run monthly.",
+    description: "Crawls Best Carding World forum posts published within the last month/year.",
     type: "dark_web",
   },
 ]
