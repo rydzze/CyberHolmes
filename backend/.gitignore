@@ -1,17 +1,17 @@
-
+# analysis
 /analysis/__pycache__
 
-/api/__pycache__
-/api/migrations/__pycache__
-
+# config
 /config/__pycache__
 
+# crawler
 crawler/crawler/__pycache__
 crawler/crawler/spiders/__pycache__
 
+# main
 /main/__pycache__
 /main/migrations/__pycache__
-/main/management/commands/__pycache__
 
+# venv and .env
 /venv
 /.env

@@ -30,7 +30,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 DEBUG = env('DEBUG')
 SECRET_KEY = env('SECRET_KEY')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'frontend', 'www.cyberholmes.me', 'cyberholmes.me']
 
 
 # Application definition
@@ -90,6 +90,9 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://frontend:3000",
+    "http://www.cyberholmes.me",
+    "http://cyberholmes.me"
 ]
 
 # Database
