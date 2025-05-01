@@ -1,5 +1,5 @@
 import scrapy
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 from crawler.items import Post
 from scrapy import signals
 
@@ -19,7 +19,7 @@ class RedditSpider(scrapy.Spider):
             self.logger.error("Initialisation failed: No keyword provided.")
             raise ValueError("No keyword provided.")
         self.keyword = keyword
-        self.seen_links = set()
+        self.seen_titles = set()
         self.logger.info(f"Initialised spider with keyword: '{self.keyword}'")
 
     @classmethod
@@ -33,7 +33,7 @@ class RedditSpider(scrapy.Spider):
 
     def start_requests(self):
         encoded_keyword = quote_plus(self.keyword)
-        url = f'https://old.reddit.com/search/?q={encoded_keyword}&sort=new&restrict_sr=&t=hour'
+        url = f'https://old.reddit.com/search/?q={encoded_keyword}&sort=new&restrict_sr=&t=month'
         
         self.logger.info(f"Starting request with URL: {url}")
         yield scrapy.Request(url, callback=self.parse)
@@ -43,7 +43,7 @@ class RedditSpider(scrapy.Spider):
         Parse the search results page to extract post links and handle pagination.
         
         This method extracts links to posts that contain 'comment' in their URL and ensures
-        they have not been processed already using the seen_links set. It also follows the "next page" links
+        they have not been processed already using the seen_titles set. It also follows the "next page" links
         if available.
         
         Args:
@@ -59,9 +59,10 @@ class RedditSpider(scrapy.Spider):
         
         for link in links:
             post_link = response.urljoin(link.get())
-            if (post_link.startswith('https://old.reddit.com/r/') and
-                'comment' in post_link and post_link not in self.seen_links):
-                self.seen_links.add(post_link)
+            title = urlparse(post_link).path.strip('/').split('/')
+            if (post_link.startswith('https://old.reddit.com/r/')
+                and 'comment' in post_link and title[4] not in self.seen_titles):
+                self.seen_titles.add(title[4])
                 yield scrapy.Request(post_link, callback=self.parse_post, meta={'post_link': post_link})
 
         next_page = response.css('a[rel="nofollow next"]::attr(href)').getall()

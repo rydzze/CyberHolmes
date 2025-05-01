@@ -15,7 +15,7 @@ const SOURCES = [
   {
     id: "Reddit",
     name: "Clear Web - Reddit",
-    description: "Crawls Reddit posts published within the last hour.",
+    description: "Crawls Reddit posts published within the last month.",
     type: "clear_web",
   },
   {

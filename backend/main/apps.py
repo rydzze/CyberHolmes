@@ -11,14 +11,13 @@ class MainConfig(AppConfig):
 
         if os.environ.get('RUN_MAIN', None) != 'true':
             import asyncio
-            from twisted.internet import asyncioreactor
-            
+
             if sys.platform == 'win32':
-                loop = asyncio.SelectorEventLoop()
-                asyncio.set_event_loop(loop)
+                from twisted.internet import selectreactor
+                selectreactor.install()
             else:
-                loop = asyncio.get_event_loop()
-            asyncioreactor.install(loop)
+                from twisted.internet import epollreactor
+                epollreactor.install()
             
             import crochet
             crochet.setup()

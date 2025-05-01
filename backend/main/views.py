@@ -13,6 +13,7 @@ from .serializers import *
 import calendar
 import logging
 import crochet
+import sys
 
 crochet.setup()
 
@@ -41,7 +42,10 @@ class SpiderViewSet(viewsets.ModelViewSet):
                 )
 
             settings = get_project_settings()
-            settings.set('TWISTED_REACTOR', 'twisted.internet.selectreactor.SelectReactor')
+            if sys.platform == 'win32':
+                settings.set('TWISTED_REACTOR', 'twisted.internet.selectreactor.SelectReactor')
+            else:
+                settings.set('TWISTED_REACTOR', 'twisted.internet.epollreactor.EPollReactor')
             settings.set('LOG_ENABLED', True)
             settings.set('LOG_LEVEL', 'DEBUG')
             settings.set('LOG_STDOUT', True)

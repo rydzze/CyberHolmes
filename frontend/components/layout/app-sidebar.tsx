@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 // Navigation items moved to a separate config file
-import { navigationItems } from "@/config/navigation"
+import { navigationItems } from "@/components/layout/navigation"
 
 // Add handleLogout prop to the interface
 interface AppSidebarProps {
