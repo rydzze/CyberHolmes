@@ -1,6 +1,5 @@
-import { LoginPage } from "@/components/features/auth/login-page"
+import { redirect } from "next/navigation"
 
 export default function Page() {
-  return <LoginPage />
+  redirect("/dashboard")
 }
-
