@@ -7,6 +7,20 @@ class MainConfig(AppConfig):
     name = 'main'
 
     def ready(self):
+        """
+        Perform application startup initialisation.
+
+        - Imports signal handlers from the 'main.signals' module.
+        - On non-reloader runs, sets up the Twisted reactor appropriate for the OS:
+        - Uses 'selectreactor' on Windows.
+        - Uses 'epollreactor' on other platforms.
+        - Initializes Crochet to enable Twisted integration with asyncio.
+        - Prints the active reactor class for confirmation.
+        
+        Returns:
+            The result of the superclass's ready() method.
+        """
+
         import main.signals
 
         if os.environ.get('RUN_MAIN', None) != 'true':

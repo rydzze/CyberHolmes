@@ -34,6 +34,24 @@ class Model:
     
     @classmethod
     def init_MITRE_ATTACK_embeddings(cls, tokenizer, model):
+        """
+        Initialise and cache the MITRE ATT&CK technique embeddings using technique descriptions.
+
+        This method attempts to load precomputed embeddings from disk. If the embeddings file does not exist,
+        it retrieves MITRE ATT&CK techniques using the attack client, computes sentence embeddings from
+        each technique's description, and caches the result.
+
+        Args:
+            tokenizer (transformers.PreTrainedTokenizer): Tokenizer used for embedding generation.
+            model (transformers.PreTrainedModel): Pretrained transformer model used to generate embeddings.
+
+        Returns:
+            list: A list of tuples in the format (technique_id, technique_name, embedding_tensor), where:
+                - technique_id (str): ATT&CK technique external ID (e.g., "T1059")
+                - technique_name (str): Human-readable name of the technique
+                - embedding_tensor (torch.Tensor): Sentence embedding for the technique's description
+        """
+        
         if cls.mitre_attack_embeddings is None:
             embeddings_path = os.path.join(settings.BASE_DIR, 'analysis', 'mitre_attack_embeddings.joblib')
 

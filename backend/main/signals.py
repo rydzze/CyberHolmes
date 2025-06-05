@@ -8,6 +8,30 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Post)
 def analyse_new_post(sender, instance, created, **kwargs):
+    """
+    Signal handler triggered after a new Post instance is saved.
+
+    Performs automated threat analysis and sentiment analysis on the post's text content.
+    If the post is identified as a threat, it further generates CVSS v4 metrics and extracts
+    relevant MITRE ATT&CK techniques.
+
+    Args:
+        sender (Model): The model class (Post).
+        instance (Post): The newly saved Post instance.
+        created (bool): Indicates if this is a new instance (True) or update (False).
+        **kwargs: Additional keyword arguments.
+
+    Side Effects:
+        Creates and saves an Analysis object linked to the Post instance, containing:
+        - Threat prediction and confidence score
+        - Sentiment analysis scores
+        - CVSS vector, base score, and rating (if threat detected)
+        - MITRE ATT&CK techniques (if threat detected and CVSS rating is valid)
+
+    Logs:
+        Any exceptions encountered during processing are logged as errors.
+    """
+    
     if created:
         try:
             text = f"{instance.title} {instance.content or ''}".strip()
